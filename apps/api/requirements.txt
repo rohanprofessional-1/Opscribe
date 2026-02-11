@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlmodel
+psycopg2-binary
+pgvector
+langchain
+langchain-openai
+python-dotenv
+httpx
+pydantic-settings
+alembic

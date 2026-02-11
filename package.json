@@ -1,0 +1,16 @@
+{
+    "name": "opscribe-monorepo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+        "dev:web": "npm run dev -w apps/web",
+        "dev:api": "source apps/api/venv/bin/activate && uvicorn apps.api.main:app --reload --port 8000"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1"
+    }
+}
