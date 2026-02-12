@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 class ArchitectureGraph(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: UUID = Field(default_factory=uuid4, index=True)
     name: str
     description: Optional[str] = None
     nodes: List["Node"] = Relationship(back_populates="graph")
