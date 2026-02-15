@@ -12,6 +12,6 @@ class KnowledgeBaseItem(SQLModel, table=True):
     entity_id: UUID = Field(index=True)  # Links to Node.id or Edge.id
     content: str  # The text chunk
     embedding: List[float] = Field(sa_column=Column(Vector(1536)))  # OpenAI embeddings dimensions
-    metadata: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
+    metadata_: Dict[str, Any] = Field(default={}, sa_column=Column("metadata", JSONB))
     created_at: str
     updated_at: str

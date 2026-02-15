@@ -1,2 +1,4 @@
 node_modules
 apps/api/venv
+*.pyc
+.env
