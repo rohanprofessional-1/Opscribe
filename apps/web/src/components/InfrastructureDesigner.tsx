@@ -7,8 +7,9 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   MiniMap,
+  MarkerType,
 } from "reactflow";
-import type { Node, Connection, ReactFlowInstance } from "reactflow";
+import type { Node, Edge, Connection, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
 import NodePalette from "./NodePalette";
@@ -28,6 +29,9 @@ const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: "#6b7280" },
   type: "smoothstep",
   animated: true,
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+  },
 };
 
 let nodeId = 0;
@@ -95,16 +99,45 @@ export default function InfrastructureDesigner() {
     event.dataTransfer.effectAllowed = "move";
   };
 
+  const deselectEdges = useCallback(() => {
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        selected: false,
+        style: { strokeWidth: 2, stroke: "#6b7280" },
+      }))
+    );
+  }, [setEdges]);
+
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node<InfrastructureNodeData>) => {
       setSelectedNode(node);
+      deselectEdges();
     },
-    [],
+    [deselectEdges],
   );
 
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
-  }, []);
+    deselectEdges();
+  }, [deselectEdges]);
+
+  const onEdgeClick = useCallback(
+    (_: React.MouseEvent, edge: Edge) => {
+      setSelectedNode(null);
+      setEdges((eds) =>
+        eds.map((e) => ({
+          ...e,
+          selected: e.id === edge.id,
+          style:
+            e.id === edge.id
+              ? { strokeWidth: 3, stroke: "#ef4444" }
+              : { strokeWidth: 2, stroke: "#6b7280" },
+        })),
+      );
+    },
+    [setEdges],
+  );
 
   const onUpdateNode = useCallback(
     (nodeId: string, data: Partial<InfrastructureNodeData>) => {
@@ -140,12 +173,20 @@ export default function InfrastructureDesigner() {
     setSelectedNode(null);
   }, []);
 
+  // Handle keyboard delete for selected edges
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "Backspace" || event.key === "Delete") {
+        setEdges((eds) => eds.filter((e) => !e.selected));
+      }
+    },
+    [setEdges],
+  );
+
   return (
     <div className="flex h-screen bg-gray-950">
-      {/* Left Panel - Node Palette */}
       <NodePalette onDragStart={onDragStart} />
 
-      {/* Middle - Canvas */}
       <div className="flex-1 relative" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
@@ -158,8 +199,11 @@ export default function InfrastructureDesigner() {
           onDragOver={onDragOver}
           onNodeClick={onNodeClick}
           onPaneClick={onPaneClick}
+          onEdgeClick={onEdgeClick}
+          onKeyDown={onKeyDown}
           nodeTypes={nodeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
+          deleteKeyCode={["Backspace", "Delete"]}
           fitView
           snapToGrid
           snapGrid={[15, 15]}
@@ -181,7 +225,6 @@ export default function InfrastructureDesigner() {
           />
         </ReactFlow>
 
-        {/* Canvas Header */}
         <div className="absolute top-4 left-4 bg-gray-800/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-700">
           <h1 className="text-sm font-medium text-white">
             Infrastructure Designer
@@ -192,7 +235,6 @@ export default function InfrastructureDesigner() {
         </div>
       </div>
 
-      {/* Right Panel - Properties */}
       <PropertiesPanel
         selectedNode={selectedNode}
         onUpdateNode={onUpdateNode}

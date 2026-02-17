@@ -62,7 +62,6 @@ export default function PropertiesPanel({
                 onChange={(e) => handleChange("dbType", e.target.value)}
                 className="form-select"
               >
-                <option value="">Select type...</option>
                 <option value="sql">SQL</option>
                 <option value="nosql">NoSQL</option>
                 <option value="warehouse">Data Warehouse</option>
@@ -132,6 +131,16 @@ export default function PropertiesPanel({
                 value={(data as any).backupSchedule || ""}
                 onChange={(e) => handleChange("backupSchedule", e.target.value)}
                 placeholder="e.g., 0 2 * * *"
+                className="form-input"
+              />
+            </FormField>
+
+            <FormField label="Description">
+              <textarea
+                rows={2}
+                value={(data as any).description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Describe the database node..."
                 className="form-input"
               />
             </FormField>
@@ -219,6 +228,18 @@ export default function PropertiesPanel({
                     className="form-input"
                   />
                 </FormField>
+
+                <FormField label="Description">
+                  <textarea
+                    rows={2}
+                    value={(data as any).description || ""}
+                    onChange={(e) =>
+                      handleChange("description", e.target.value)
+                    }
+                    placeholder="Describe the compute node..."
+                    className="form-input"
+                  />
+                </FormField>
               </>
             )}
           </>
@@ -275,6 +296,16 @@ export default function PropertiesPanel({
                 <option value="replicated">Replicated</option>
                 <option value="distributed">Distributed</option>
               </select>
+            </FormField>
+
+            <FormField label="Description">
+              <textarea
+                rows={2}
+                value={(data as any).description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Describe the storage node..."
+                className="form-input"
+              />
             </FormField>
           </>
         );
@@ -334,6 +365,16 @@ export default function PropertiesPanel({
                 <span className="text-sm text-gray-300">Enabled</span>
               </label>
             </FormField>
+
+            <FormField label="Description">
+              <textarea
+                rows={2}
+                value={(data as any).description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Describe the database node..."
+                className="form-input"
+              />
+            </FormField>
           </>
         );
 
@@ -366,6 +407,16 @@ export default function PropertiesPanel({
                 <option value="rsa-2048">RSA-2048</option>
                 <option value="none">None</option>
               </select>
+            </FormField>
+
+            <FormField label="Description">
+              <textarea
+                rows={2}
+                value={(data as any).description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Describe the database node..."
+                className="form-input"
+              />
             </FormField>
           </>
         );
@@ -423,6 +474,16 @@ export default function PropertiesPanel({
                 <span className="text-sm text-gray-300">Preserve Order</span>
               </label>
             </FormField>
+
+            <FormField label="Description">
+              <textarea
+                rows={2}
+                value={(data as any).description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Describe the database node..."
+                className="form-input"
+              />
+            </FormField>
           </>
         );
 
@@ -433,7 +494,6 @@ export default function PropertiesPanel({
 
   return (
     <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col h-full">
-      {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-white">Properties</h2>
@@ -445,7 +505,6 @@ export default function PropertiesPanel({
           </button>
         </div>
 
-        {/* Node Info */}
         <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
           <div
             className="p-2 rounded-md"
@@ -467,12 +526,10 @@ export default function PropertiesPanel({
         </div>
       </div>
 
-      {/* Form Fields */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {renderCategoryFields()}
       </div>
 
-      {/* Footer */}
       <div className="p-4 border-t border-gray-700">
         <button
           onClick={() => onDeleteNode(id)}
@@ -486,7 +543,6 @@ export default function PropertiesPanel({
   );
 }
 
-// Helper component for form fields
 function FormField({
   label,
   children,

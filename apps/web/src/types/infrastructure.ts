@@ -12,7 +12,7 @@ export interface BaseNodeData {
   label: string;
   category: NodeCategory;
   icon: string;
-  description: string;
+  description?: string;
 }
 
 // Database node speific information
@@ -88,7 +88,7 @@ export interface NodeTemplate {
   label: string;
   category: NodeCategory;
   icon: string;
-  description: string;
+  description?: string;
   defaultData: Partial<InfrastructureNodeData>;
 }
 
