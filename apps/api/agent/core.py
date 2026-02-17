@@ -13,7 +13,7 @@ def get_agent_executor() -> AgentExecutor:
     Initializes and returns the LangChain AgentExecutor with tools and LLM.
     """
     # Ensure API Key is set
-    if not os.environ.get("OPENAI_API_KEY"):
+    if not os.environ.get("OPENAI_API_KEY"): # needs to change in future
         # For development/demo, we might warn or error. 
         # Assuming it's in env or .env file loaded by main.py
         pass
