@@ -13,6 +13,7 @@ import type { Node, Edge, Connection, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
 import NodePalette from "./NodePalette";
+import GithubConnectPanel from "./GithubConnectPanel";
 import PropertiesPanel from "./PropertiesPanel";
 import InfrastructureNode from "./InfrastructureNode";
 import type {
@@ -186,6 +187,7 @@ export default function InfrastructureDesigner() {
   return (
     <div className="flex h-screen bg-gray-950">
       <NodePalette onDragStart={onDragStart} />
+      <GithubConnectPanel />
 
       <div className="flex-1 relative" ref={reactFlowWrapper}>
         <ReactFlow

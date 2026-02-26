@@ -79,7 +79,7 @@ export const nodeTemplates: NodeTemplate[] = [
     label: "Virtual Machine",
     category: "compute",
     icon: "Server",
-    description: "Describe the virtual machine node",
+    description: "Describe the virtual machine node", // decsription --> IR -> LLM (output)
     defaultData: {
       instanceType: "standard",
       cpu: 2,

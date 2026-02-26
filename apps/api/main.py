@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from apps.api.database import create_db_and_tables
-from apps.api.routers import clients, graphs, nodes, edges
+from apps.api.routers import clients, graphs, nodes, edges, github
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,10 +19,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(clients.router)
-app.include_router(graphs.router)
-app.include_router(nodes.router)
-app.include_router(edges.router)
+app.include_router(clients.router, prefix="/api/v1")
+app.include_router(graphs.router, prefix="/api/v1")
+app.include_router(nodes.router, prefix="/api/v1")
+app.include_router(edges.router, prefix="/api/v1")
+app.include_router(github.router, prefix="/api/v1")
 
 @app.get("/health")
 async def health_check():
