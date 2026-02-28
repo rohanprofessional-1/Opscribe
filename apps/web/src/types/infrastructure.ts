@@ -1,3 +1,7 @@
+/**
+ * This file contains the types and interfaces for the infrastructure design.
+ */
+
 // Types of Nodes
 export type NodeCategory =
   | "database"
@@ -98,4 +102,32 @@ export interface CategoryConfig {
   label: string;
   icon: string;
   color: string;
+}
+
+// Infrastructure design
+export interface InfrastructureDesign {
+  id: string;
+  name: string;
+  updatedAt: string;
+  nodes: Array<{
+    id: string;
+    type: string;
+    position: { x: number; y: number };
+    data: InfrastructureNodeData;
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    sourceHandle?: string;
+    targetHandle?: string;
+  }>;
+}
+
+// Props for the infrastructure dashboard
+export interface InfrastructureDashboardProps {
+  designs: InfrastructureDesign[];
+  onCreateNew: () => void;
+  onOpenDesign: (id: string) => void;
+  onDeleteDesign: (id: string) => void;
 }

@@ -1,3 +1,10 @@
+/**
+ * This component is the infrastructure node for the infrastructure design
+ * and will be on the canvas.
+ * It displays the node and allows the user to drag and drop it onto the canvas.
+ * It also allows the user to select the node and edit its properties.
+ */
+
 import { memo } from "react";
 import { Handle, Position } from "reactflow";
 import type { NodeProps } from "reactflow";

@@ -1,3 +1,10 @@
+/**
+ * This component is the node palette for the infrastructure design
+ * and will be on the right side of the canvas.
+ * It displays the categories and nodes that can be created for each category
+ * and allows the user to drag and drop nodes onto the canvas.
+ */
+
 import { useState } from "react";
 import * as Icons from "lucide-react";
 import { ChevronDown, ChevronRight, GripVertical, Search } from "lucide-react";

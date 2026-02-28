@@ -1,3 +1,13 @@
+/**
+ * This file creates a template for the types of categories and the nodes that
+ * can be created for each category.
+ *
+ * Currently there are 6 categories: database, compute, storage, networking, security, and messaging.
+ * Each category has a list of nodes that can be created for that category.
+ * Each node has a list of properties, relationships, constraints, dependencies, and dependencies
+ * that can be set for that node.
+ */
+
 import type { NodeTemplate, CategoryConfig } from "../types/infrastructure";
 
 export const categories: CategoryConfig[] = [
