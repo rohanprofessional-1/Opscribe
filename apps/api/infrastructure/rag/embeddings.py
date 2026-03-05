@@ -1,9 +1,9 @@
 from typing import List
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    OPENAI_API_KEY: str
+    GEMINI_API_KEY: str
     
     class Config:
         env_file = ".env"
@@ -12,9 +12,9 @@ settings = Settings()
 
 class EmbeddingService:
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-small",
-            api_key=settings.OPENAI_API_KEY
+        self.embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/text-embedding-004",
+            google_api_key=settings.GEMINI_API_KEY
         )
 
     def generate_embedding(self, text: str) -> List[float]:

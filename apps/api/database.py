@@ -13,5 +13,11 @@ def get_session() -> Generator[Session, None, None]:
 
 def create_db_and_tables():
     from . import models  # Import models to register them with SQLModel
-    from sqlmodel import SQLModel
+    from apps.api.infrastructure.rag import models as rag_models  # Import RAG models for table creation
+    from sqlmodel import SQLModel, text
+    
+    # Ensure the pgvector extension is enabled before creating tables
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        
     SQLModel.metadata.create_all(engine)

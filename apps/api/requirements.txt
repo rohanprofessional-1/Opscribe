@@ -4,7 +4,7 @@ sqlmodel
 psycopg2-binary
 pgvector
 langchain
-langchain-openai
+langchain-google-genai
 python-dotenv
 httpx
 pydantic-settings

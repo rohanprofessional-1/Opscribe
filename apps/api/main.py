@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+import os
+
+# Load .env file automatically
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
 from apps.api.database import create_db_and_tables
-from apps.api.routers import clients, graphs, nodes, edges
+from apps.api.routers import clients, graphs, nodes, edges, rag
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,6 +29,7 @@ app.include_router(clients.router)
 app.include_router(graphs.router)
 app.include_router(nodes.router)
 app.include_router(edges.router)
+app.include_router(rag.router)
 
 @app.get("/health")
 async def health_check():
