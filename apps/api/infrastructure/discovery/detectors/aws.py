@@ -44,6 +44,12 @@ class AWSDetector(BaseDetector):
                 return tag.get("Value")
         return None
 
+    def _get_tags_dict(self, tags: List[Dict]) -> Dict[str, str]:
+        """Convert AWS resource tags list to a dictionary"""
+        if not tags:
+            return {}
+        return {tag.get("Key") or tag.get("key"): tag.get("Value") or tag.get("value") for tag in tags if tag.get("Key") or tag.get("key")}
+
     def _get_account_id(self) -> str:
         """Get AWS account ID"""
         if not self.account_id:
@@ -55,7 +61,7 @@ class AWSDetector(BaseDetector):
                 self.account_id = "000000000000"
         return self.account_id
 
-    async def discover(self, **kwargs) -> DiscoveryResult:
+    async def discover(self, include_relationships: bool = True, **kwargs) -> DiscoveryResult:
         nodes: List[DiscoveryNode] = []
         edges: List[DiscoveryEdge] = []
 
@@ -146,8 +152,11 @@ class AWSDetector(BaseDetector):
             nodes.extend(self._discover_api_gateway())
 
             # Detect relationships between resources
-            logger.info("Detecting resource relationships...")
-            edges.extend(self._detect_relationships(nodes))
+            if include_relationships:
+                logger.info("Detecting resource relationships...")
+                edges.extend(self._detect_relationships(nodes))
+            else:
+                logger.info("Skipping relationship detection for datalake population.")
 
         except Exception as e:
             logger.error(f"AWS discovery failed: {e}", exc_info=True)
@@ -194,6 +203,12 @@ class AWSDetector(BaseDetector):
                                     sg["GroupId"]
                                     for sg in instance.get("SecurityGroups", [])
                                 ],
+                                "image_id": instance.get("ImageId"),
+                                "iam_instance_profile": instance.get("IamInstanceProfile", {}).get("Arn"),
+                                "launch_time": instance.get("LaunchTime").isoformat() if instance.get("LaunchTime") else None,
+                                "monitoring": instance.get("Monitoring", {}).get("State"),
+                                "public_dns_name": instance.get("PublicDnsName"),
+                                "tags": self._get_tags_dict(instance.get("Tags", [])),
                             },
                             source_metadata={
                                 "arn": f"arn:aws:ec2:{self.region_name}:{self._get_account_id()}:instance/{instance_id}"
@@ -229,6 +244,10 @@ class AWSDetector(BaseDetector):
                                 "timeout": func.get("Timeout"),
                                 "vpc_id": func.get("VpcConfig", {}).get("VpcId"),
                                 "role_arn": func.get("Role"),
+                                "description": func.get("Description"),
+                                "last_modified": func.get("LastModified"),
+                                "layers": [l.get("Arn") for l in func.get("Layers", [])],
+                                "tags": self._get_tags_dict(func.get("Tags", [])), # list_functions doesn't return tags, usually need separate call
                             },
                             source_metadata={"arn": func["FunctionArn"]},
                         )
@@ -327,15 +346,23 @@ class AWSDetector(BaseDetector):
             for bucket in response.get("Buckets", []):
                 bucket_name = bucket["Name"]
                 tags = []
-                
+
                 # Try to fetch bucket tags
                 try:
                     tags_response = s3.get_bucket_tagging(Bucket=bucket_name)
-                    tags = tags_response.get("TagSet", [])
+                    tag_list = tags_response.get("TagSet", [])
+                    tags_dict = self._get_tags_dict(tag_list)
                 except ClientError:
                     # Tags might not exist for some buckets
-                    pass
-                
+                    tags_dict = {}
+
+                # Try to fetch bucket location
+                try:
+                    location_response = s3.get_bucket_location(Bucket=bucket_name)
+                    location = location_response.get("LocationConstraint") or "us-east-1"
+                except ClientError:
+                    location = self.region_name
+
                 nodes.append(
                     DiscoveryNode(
                         key=f"s3:{bucket_name}",
@@ -349,7 +376,8 @@ class AWSDetector(BaseDetector):
                                 if bucket.get("CreationDate")
                                 else None
                             ),
-                            "tags": tags,
+                            "tags": tags_dict,
+                            "location": location,
                         },
                         source_metadata={"arn": f"arn:aws:s3:::{bucket_name}"},
                     )
@@ -486,6 +514,11 @@ class AWSDetector(BaseDetector):
                             "vpc_id": db.get("DBSubnetGroup", {}).get("VpcId"),
                             "endpoint": db.get("Endpoint", {}).get("Address"),
                             "port": db.get("Endpoint", {}).get("Port"),
+                            "multi_az": db.get("MultiAZ"),
+                            "allocated_storage": db.get("AllocatedStorage"),
+                            "storage_type": db.get("StorageType"),
+                            "db_subnet_group": db.get("DBSubnetGroup", {}).get("DBSubnetGroupName"),
+                            "tags": self._get_tags_dict(db.get("TagList", [])),
                         },
                         source_metadata={"arn": db["DBInstanceArn"]},
                     )
@@ -606,6 +639,7 @@ class AWSDetector(BaseDetector):
                             "cidr_block": vpc.get("CidrBlock"),
                             "state": vpc.get("State"),
                             "is_default": vpc.get("IsDefault"),
+                            "tags": self._get_tags_dict(vpc.get("Tags", [])),
                         },
                         source_metadata={
                             "arn": f"arn:aws:ec2:{self.region_name}:{self._get_account_id()}:vpc/{vpc_id}"

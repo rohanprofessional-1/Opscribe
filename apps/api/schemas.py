@@ -130,3 +130,10 @@ class GraphVisualization(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     nodes: List[NodeRead]
     edges: List[EdgeRead]
+
+# Discovery Schemas
+class DiscoveryRequest(BaseModel):
+    client_id: UUID
+    graph_id: UUID
+    source_names: Optional[List[str]] = ["aws"]
+    include_relationships: bool = True
