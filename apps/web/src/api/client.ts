@@ -94,4 +94,21 @@ export const api = {
   async deleteGraph(graphId: string): Promise<void> {
     await request(`graphs/${graphId}`, { method: "DELETE", parseJson: false });
   },
+
+  async setupAccount(data: { client_name: string; user_email: string; user_full_name: string; sso_domain?: string }): Promise<any> {
+    return request<any>("auth/setup", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async loginById(clientId: string): Promise<any> {
+    return request<any>(`auth/login?client_id=${clientId}`, {
+      method: "POST",
+    });
+  },
+
+  getSSOLoginUrl(): string {
+    return `${BASE.replace(/\/$/, "")}/auth/sso/login`;
+  },
 };
