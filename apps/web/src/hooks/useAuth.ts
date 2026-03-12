@@ -6,6 +6,33 @@ export function useAuth() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Check URL params for SSO callback (Auth0 redirects here with token)
+        const params = new URLSearchParams(window.location.search);
+        const ssoToken = params.get('token');
+        const clientId = params.get('client_id');
+        const clientName = params.get('client_name');
+        const userEmail = params.get('user_email');
+        const userName = params.get('user_name');
+
+        if (ssoToken && clientId) {
+            // SSO login successful — store credentials
+            const ssoUser = {
+                id: clientId,
+                name: clientName || 'Unknown',
+                email: userEmail,
+                full_name: userName,
+            };
+            localStorage.setItem('opscribe_token', ssoToken);
+            localStorage.setItem('opscribe_user', JSON.stringify(ssoUser));
+            setUser(ssoUser);
+            setLoading(false);
+
+            // Clean up URL params so they don't persist on refresh
+            window.history.replaceState({}, '', window.location.pathname);
+            return;
+        }
+
+        // Otherwise, check localStorage for existing session
         const token = localStorage.getItem('opscribe_token');
         const storedUser = localStorage.getItem('opscribe_user');
         if (token && storedUser) {

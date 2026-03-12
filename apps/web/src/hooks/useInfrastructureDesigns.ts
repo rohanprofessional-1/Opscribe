@@ -18,22 +18,25 @@ function graphToDesign(g: {
 }
 
 export function useInfrastructureDesigns() {
-  const [clientId, setClientId] = useState<string | null>(null);
   const [designs, setDesigns] = useState<InfrastructureDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Get the authenticated client ID from localStorage (set by useAuth)
+  const storedUser = localStorage.getItem("opscribe_user");
+  const clientId = storedUser ? JSON.parse(storedUser).id : null;
+
   useEffect(() => {
+    if (!clientId) {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     setError(null);
     api
-      .getAnonSession()
-      .then((client) => {
-        if (cancelled) return;
-        setClientId(client.id);
-        return api.listGraphs(client.id);
-      })
+      .listGraphs(clientId)
       .then((graphs) => {
         if (cancelled || graphs === undefined) return;
         setDesigns(graphs.map(graphToDesign));
@@ -47,7 +50,7 @@ export function useInfrastructureDesigns() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [clientId]);
 
   const createDesignAsync = useCallback((): Promise<InfrastructureDesign> => {
     if (!clientId) return Promise.reject(new Error("Client not loaded"));

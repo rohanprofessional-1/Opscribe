@@ -13,6 +13,14 @@ const BASE =
   (import.meta as unknown as { env: { VITE_API_URL?: string } }).env
     ?.VITE_API_URL ?? "/api";
 
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("opscribe_token");
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  return {};
+}
+
 async function request<T>(
   path: string,
   options: RequestInit & { parseJson?: boolean } = {},
@@ -26,6 +34,7 @@ async function request<T>(
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...getAuthHeaders(),
       ...(init.headers as Record<string, string>),
     },
   });
@@ -38,10 +47,6 @@ async function request<T>(
 }
 
 export const api = {
-  async getAnonSession(): Promise<ClientRead> {
-    return request<ClientRead>("clients/anon/session");
-  },
-
   async listGraphs(clientId: string): Promise<GraphRead[]> {
     return request<GraphRead[]>(`clients/${clientId}/graphs`);
   },

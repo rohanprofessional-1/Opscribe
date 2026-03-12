@@ -7,6 +7,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
+from dotenv import load_dotenv
+
+# Load .env from the api directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 from apps.api.database import get_session
 from apps.api.models import Client, User
@@ -18,9 +22,18 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Auth0 Config
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
-if AUTH0_DOMAIN:
+AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
+AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
+
+# Initialize OAuth — always create the object, conditionally register Auth0
+config = Config(environ=os.environ)
+oauth = OAuth(config)
+
+if AUTH0_DOMAIN and AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET:
     oauth.register(
         name='auth0',
+        client_id=AUTH0_CLIENT_ID,
+        client_secret=AUTH0_CLIENT_SECRET,
         server_metadata_url=f'https://{AUTH0_DOMAIN}/.well-known/openid-configuration',
         client_kwargs={
             'scope': 'openid profile email',
