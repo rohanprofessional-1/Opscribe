@@ -7,7 +7,7 @@ from typing import List, Tuple, Optional
 from pathlib import Path
 from urllib.parse import urlparse
 
-from apps.api.infrastructure.repo.models import FileMetadata, ParseableFileSet
+from apps.api.ingestors.github.models import FileMetadata, ParseableFileSet
 
 class RepositoryWalker:
     def __init__(self, repo_url: str, branch: str, access_token: str):

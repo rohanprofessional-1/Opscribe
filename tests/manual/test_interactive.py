@@ -11,7 +11,7 @@ Usage:
 
 import asyncio
 import sys
-from infrastructure.discovery.detectors.aws import AWSDetector
+from apps.api.ingestors.aws.detector import AWSDetector
 
 
 class Colors:

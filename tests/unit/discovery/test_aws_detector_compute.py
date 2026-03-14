@@ -8,7 +8,7 @@ with proper attributes and properties.
 import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime
-from infrastructure.discovery.detectors.aws import AWSDetector
+from apps.api.ingestors.aws.detector import AWSDetector
 
 
 class TestEC2Discovery:

@@ -1,5 +1,24 @@
-from typing import Dict, Any
+from dataclasses import dataclass
+from typing import List, Dict, Any
 from pydantic import BaseModel, Field
+
+
+# --- Repo Walker Models ---
+
+@dataclass
+class FileMetadata:
+    path: str
+    extension: str
+    size_bytes: int
+    last_commit_sha: str
+
+@dataclass
+class ParseableFileSet:
+    tier_1_files: List[FileMetadata]
+    tier_2_files: List[FileMetadata]
+
+
+# --- Parser Models ---
 
 class InfrastructureSignal(BaseModel):
     component_type: str = Field(description="The architectural archetype, e.g., 'Database', 'Cache', 'Worker', 'Queue', 'API', 'Storage'")

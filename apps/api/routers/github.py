@@ -8,9 +8,9 @@ from uuid import UUID
 
 from apps.api.database import get_session
 from apps.api.models import Client, ConnectedRepository
-from apps.api.infrastructure.github.security import encrypt_token, decrypt_token
-from apps.api.infrastructure.github.client import GitHubClient
-from apps.api.infrastructure.repo.walker import RepositoryWalker
+from apps.api.ingestors.github.security import encrypt_token, decrypt_token
+from apps.api.ingestors.github.client import GitHubClient
+from apps.api.ingestors.github.walker import RepositoryWalker
 
 router = APIRouter(
     prefix="/github",

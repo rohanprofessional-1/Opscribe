@@ -13,7 +13,7 @@ repo_root = Path(__file__).parent.parent
 sys.path.insert(0, str(repo_root / "apps" / "api"))
 
 # Now we can import from the app
-from infrastructure.discovery.detectors.aws import AWSDetector
+from apps.api.ingestors.aws.detector import AWSDetector
 
 
 @pytest.fixture

@@ -2,9 +2,9 @@ from typing import List, Dict, Type
 import logging
 from uuid import UUID
 from sqlmodel import Session, select
-from .detectors.base import BaseDetector
-from .schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
-from ...models import Node, Edge, NodeType, EdgeType
+from apps.api.ingestors.aws.base import BaseDetector
+from apps.api.ingestors.aws.schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
+from apps.api.models import Node, Edge, NodeType, EdgeType
 
 logger = logging.getLogger(__name__)
 

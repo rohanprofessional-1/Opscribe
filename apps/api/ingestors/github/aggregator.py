@@ -1,6 +1,6 @@
 from typing import List, Dict
 from thefuzz import fuzz
-from apps.api.infrastructure.parsers.models import InfrastructureSignal
+from apps.api.ingestors.github.models import InfrastructureSignal
 
 class SignalAggregator:
     """

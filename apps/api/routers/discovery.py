@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlmodel import Session
 from apps.api.database import get_session
-from apps.api.infrastructure.discovery.manager import DiscoveryManager
-from apps.api.infrastructure.discovery.detectors.aws import AWSDetector
+from apps.api.ingestors.aws.manager import DiscoveryManager
+from apps.api.ingestors.aws.detector import AWSDetector
 from apps.api import schemas
 
 router = APIRouter(

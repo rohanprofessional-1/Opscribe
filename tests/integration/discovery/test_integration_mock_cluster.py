@@ -7,7 +7,7 @@ relationships between resources in a realistic infrastructure setup.
 
 import pytest
 from .mock_aws_cluster import MockAWSCluster
-from .aws import AWSDetector
+from apps.api.ingestors.aws.detector import AWSDetector
 
 
 class TestMockClusterSetup:

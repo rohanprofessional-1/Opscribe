@@ -1,9 +1,9 @@
 import asyncio
 import os
-from apps.api.infrastructure.parsers.models import InfrastructureSignal
-from apps.api.infrastructure.parsers.deterministic import IaCParser, DependencyParser
-from apps.api.infrastructure.parsers.semantic import SemanticParser
-from apps.api.infrastructure.parsers.aggregator import SignalAggregator
+from apps.api.ingestors.github.models import InfrastructureSignal
+from apps.api.ingestors.github.deterministic import IaCParser, DependencyParser
+from apps.api.ingestors.github.semantic import SemanticParser
+from apps.api.ingestors.github.aggregator import SignalAggregator
 
 async def test_parsing_pipeline():
     print("=== Testing IaC Parser (Terraform) ===")

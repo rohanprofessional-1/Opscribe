@@ -12,7 +12,7 @@ import os
 # Add the apps/api directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'apps/api'))
 
-from infrastructure.discovery.detectors.aws import AWSDetector
+from apps.api.ingestors.aws.detector import AWSDetector
 
 
 async def main():

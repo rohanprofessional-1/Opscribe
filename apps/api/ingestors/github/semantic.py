@@ -6,7 +6,7 @@ import instructor
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
-from apps.api.infrastructure.parsers.models import InfrastructureSignal
+from apps.api.ingestors.github.models import InfrastructureSignal
 
 logger = logging.getLogger(__name__)
 

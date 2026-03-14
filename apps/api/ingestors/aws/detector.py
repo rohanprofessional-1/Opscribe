@@ -2,8 +2,8 @@ import boto3
 import logging
 from typing import List, Dict, Any, Optional
 from botocore.exceptions import ClientError, BotoCoreError
-from .base import BaseDetector
-from ..schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
+from apps.api.ingestors.aws.base import BaseDetector
+from apps.api.ingestors.aws.schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
 
 logger = logging.getLogger(__name__)
 

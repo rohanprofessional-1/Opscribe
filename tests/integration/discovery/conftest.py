@@ -13,7 +13,7 @@ from pathlib import Path
 repo_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(repo_root / "apps" / "api"))
 
-from tests.fixtures.mock_aws_cluster import MockAWSCluster
+from .mock_aws_cluster import MockAWSCluster
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def mocked_aws_detector(mock_cluster):
     Fixture that provides a fully mocked AWSDetector.
     All boto3 calls are intercepted and return mock_cluster data.
     """
-    from infrastructure.discovery.detectors.aws import AWSDetector
+    from apps.api.ingestors.aws.detector import AWSDetector
 
     with patch("boto3.client") as mock_boto_client:
         # Create the detector

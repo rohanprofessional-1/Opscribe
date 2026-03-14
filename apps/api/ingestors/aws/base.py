@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from ..schemas import DiscoveryResult
+from apps.api.ingestors.aws.schemas import DiscoveryResult
 
 class BaseDetector(ABC):
     @property

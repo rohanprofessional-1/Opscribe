@@ -5,7 +5,7 @@ from typing import List, Dict, Optional, Any
 import hcl2
 from ruamel.yaml import YAML
 
-from apps.api.infrastructure.parsers.models import InfrastructureSignal
+from apps.api.ingestors.github.models import InfrastructureSignal
 
 logger = logging.getLogger(__name__)
 

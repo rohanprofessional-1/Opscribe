@@ -8,8 +8,8 @@ the detection of all service categories.
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
-from .aws import AWSDetector
-from ..schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
+from apps.api.ingestors.aws.detector import AWSDetector
+from apps.api.ingestors.aws.schemas import DiscoveryResult, DiscoveryNode, DiscoveryEdge
 
 
 class MockBotoClient:
