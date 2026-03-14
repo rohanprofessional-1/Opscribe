@@ -21,7 +21,22 @@ class Client(SQLModel, table=True):
     edge_types: List["EdgeType"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     nodes: List["Node"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     edges: List["Edge"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    connected_repositories: List["ConnectedRepository"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
+
+class ConnectedRepository(SQLModel, table=True):
+    __tablename__ = "connected_repository"
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    client_id: UUID = Field(foreign_key="client.id")
+    repo_url: str
+    default_branch: str
+    encrypted_access_token: str
+    last_ingested_at: Optional[datetime] = None
+    ingestion_status: Optional[str] = None
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
+
+    client: Client = Relationship(back_populates="connected_repositories")
 
 class Graph(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
