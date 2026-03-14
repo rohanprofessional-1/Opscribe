@@ -133,5 +133,4 @@ export interface InfrastructureDashboardProps {
   onCreateNew: () => void;
   onOpenDesign: (id: string) => void;
   onDeleteDesign: (id: string) => void;
-  onOpenRag: () => void;
 }

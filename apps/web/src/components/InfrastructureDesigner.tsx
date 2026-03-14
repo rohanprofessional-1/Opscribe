@@ -20,10 +20,11 @@ import ReactFlow, {
 } from "reactflow";
 import type { Node, Edge, Connection, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bot } from "lucide-react";
 
 import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
+import RAGChat from "./RAGChat";
 import InfrastructureNode from "./InfrastructureNode";
 import type {
   NodeTemplate,
@@ -82,6 +83,17 @@ export default function InfrastructureDesigner({
     useState<Node<InfrastructureNodeData> | null>(null);
   const [loadingVisualization, setLoadingVisualization] = useState(false);
   const fetchedGraphIdRef = useRef<string | null>(null);
+
+  // UI State for toggling the AI Assistant panel on the right sidebar
+  const [showRagPanel, setShowRagPanel] = useState(false);
+
+  // Stores the anonymous session ID for RAG context tracking
+  const [clientId, setClientId] = useState<string>("");
+
+  useEffect(() => {
+    // Initialize an anonymous session to track RAG queries and metadata for the current user
+    api.getAnonSession().then((c) => setClientId(c.id));
+  }, []);
 
   // Load nodes/edges from API when opening a graph by id (UUID) that has no nodes yet
   useEffect(() => {
@@ -195,6 +207,7 @@ export default function InfrastructureDesigner({
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node<InfrastructureNodeData>) => {
       setSelectedNode(node);
+      setShowRagPanel(false); // Hide RAG panel if we are directly clicking a node
       deselectEdges();
     },
     [deselectEdges],
@@ -338,14 +351,41 @@ export default function InfrastructureDesigner({
             </p>
           </div>
         </div>
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => setShowRagPanel(!showRagPanel)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors shadow-lg ${showRagPanel
+              ? "bg-blue-600 border-blue-500 text-white"
+              : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white"
+              }`}
+          >
+            <Bot className={`w-4 h-4 ${showRagPanel ? "text-white" : "text-blue-400"}`} />
+            <span className="text-sm font-medium">AI Assistant</span>
+          </button>
+        </div>
       </div>
 
-      <PropertiesPanel
-        selectedNode={selectedNode}
-        onUpdateNode={onUpdateNode}
-        onDeleteNode={onDeleteNode}
-        onClose={onCloseProperties}
-      />
+      {/* 
+          Right Side Sidebar 
+          Dynamically switches between the selected node properties and the AI Assistant chat.
+      */}
+      {showRagPanel ? (
+        <RAGChat
+          clientId={clientId}
+          graphId={design?.id || ""}
+          nodes={nodes}
+          edges={edges}
+          designName={designName}
+          onClose={() => setShowRagPanel(false)}
+        />
+      ) : (
+        <PropertiesPanel
+          selectedNode={selectedNode}
+          onUpdateNode={onUpdateNode}
+          onDeleteNode={onDeleteNode}
+          onClose={onCloseProperties}
+        />
+      )}
     </div>
   );
 }

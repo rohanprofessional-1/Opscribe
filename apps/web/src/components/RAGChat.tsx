@@ -1,29 +1,32 @@
 import React, { useState } from "react";
-import { Send, Download, Loader2, Bot, User, Database } from "lucide-react";
+import { Send, Loader2, Bot, User, Database } from "lucide-react";
 import { api } from "../api/client";
+import type { Node, Edge } from "reactflow";
+import type { InfrastructureNodeData } from "../types/infrastructure";
 
-export default function RAGChat({ onBack, defaultGraphId = "" }: { onBack: () => void, defaultGraphId?: string }) {
-    const [graphId, setGraphId] = useState(defaultGraphId || "ae75d47b-54ba-4d96-9cc1-6dfcbb641f92"); // Use mock ID as default for convenience
-    const [ingesting, setIngesting] = useState(false);
+interface RAGChatProps {
+    clientId: string;
+    graphId: string;
+    nodes: Node<InfrastructureNodeData>[];
+    edges: Edge[];
+    designName: string;
+    onClose: () => void;
+}
+
+/**
+ * RAGChat Component
+ * 
+ * An embedded AI assistant that provides architectural insights based on the live graph.
+ * It automatically syncs canvas changes and re-ingests data before each query to ensure
+ * the LLM always has the most up-to-date context.
+ */
+export default function RAGChat({ clientId, graphId, nodes, edges, designName, onClose }: RAGChatProps) {
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [messages, setMessages] = useState<Array<{ role: "user" | "bot"; content: string; metadata?: any }>>([
-        { role: "bot", content: "Hello! I can answer questions about architecture graphs you've ingested. Use the input below to ingest a graph ID or ask me something!" }
+        { role: "bot", content: "Hello! I am your AI architect. I am looking at the graph you are currently designing. Ask me anything about it!" }
     ]);
     const [status, setStatus] = useState<string | null>(null);
-
-    const handleIngest = async () => {
-        setIngesting(true);
-        setStatus("Reading architecture graph into vector database...");
-        try {
-            const res = await api.ingestGraph(graphId);
-            setStatus(`Success! Ingested ${res.entities_ingested} nodes/edges.`);
-        } catch (e: any) {
-            setStatus(`Error: ${e?.message || e}`);
-        } finally {
-            setIngesting(false);
-        }
-    };
 
     const handleQuery = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,8 +37,42 @@ export default function RAGChat({ onBack, defaultGraphId = "" }: { onBack: () =>
         setQuery("");
         setLoading(true);
 
+        /**
+         * AUTO-INGESTION WORKFLOW
+         * 
+         * To avoid manual ingestion steps, we execute a 'Sync -> Ingest -> Query' pipeline
+         * on every user submission. This ensures semantic consistency between the 
+         * visible canvas and the AI's knowledge base.
+         */
+        setStatus("Syncing graph changes...");
+
         try {
-            const res = await api.queryRag("ab616c5a-ece1-4f93-9f3a-767f6aa52e9e", userMsg, graphId);
+            // STEP 1: Persist the immediate ReactFlow canvas state to the PostgreSQL database.
+            // This ensures the backend ingestor sees exactly what the user sees.
+            await api.syncGraph(graphId, {
+                name: designName,
+                nodes: nodes.map(n => ({
+                    id: n.id,
+                    type: n.type ?? "infrastructureNode",
+                    position: n.position,
+                    data: (n.data ?? {}) as unknown as Record<string, unknown>,
+                })),
+                edges: edges.map(e => ({
+                    id: e.id,
+                    source: e.source,
+                    target: e.target,
+                    sourceHandle: e.sourceHandle ?? undefined,
+                    targetHandle: e.targetHandle ?? undefined,
+                })),
+            });
+
+            // STEP 2: Trigger the RAG engine to re-extract and vectorize the updated DB records.
+            setStatus("Ingesting architecture vectors...");
+            await api.ingestGraph(graphId);
+
+            // STEP 3: Perform the vector retrieval and LLM inference.
+            setStatus(null);
+            const res = await api.queryRag(clientId, userMsg, graphId);
 
             const botMsg = {
                 role: "bot" as const,
@@ -52,33 +89,21 @@ export default function RAGChat({ onBack, defaultGraphId = "" }: { onBack: () =>
     };
 
     return (
-        <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
+        <div className="w-[400px] flex flex-col h-full bg-gray-900 text-gray-100 border-l border-gray-700">
             <header className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/50">
                 <div className="flex items-center gap-3">
-                    <button onClick={onBack} className="text-gray-400 hover:text-white text-sm">← Back</button>
                     <h1 className="text-xl font-bold flex items-center gap-2">
-                        <Bot className="text-blue-400" /> Infrastructure Knowledge Base
+                        <Bot className="text-blue-400" /> AI Assistant
                     </h1>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 flex items-center gap-2">
-                        <input
-                            value={graphId}
-                            onChange={(e) => setGraphId(e.target.value)}
-                            placeholder="Graph ID"
-                            className="bg-transparent text-sm border-none focus:outline-none w-80 font-mono text-xs"
-                        />
-                        <button
-                            onClick={handleIngest}
-                            disabled={ingesting}
-                            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded-md text-xs font-medium flex items-center gap-1 disabled:opacity-50 transition-colors"
-                        >
-                            {ingesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-                            {ingesting ? "Ingesting..." : "Ingest"}
-                        </button>
-                    </div>
-                </div>
+                <button
+                    onClick={onClose}
+                    className="p-1 rounded hover:bg-gray-800 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                </button>
             </header>
+
 
             {status && (
                 <div className={`p-2 text-center text-xs ${status.startsWith("Error") ? "bg-red-900/30 text-red-300" : "bg-blue-900/30 text-blue-300"}`}>
@@ -130,7 +155,7 @@ export default function RAGChat({ onBack, defaultGraphId = "" }: { onBack: () =>
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        placeholder="Ask a question about your architecture graph..."
+                        placeholder="Ask the AI about your graph..."
                     />
                     <button
                         type="submit"

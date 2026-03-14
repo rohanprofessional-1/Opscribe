@@ -5,7 +5,7 @@
  * It also allows the user to open a design and delete a design.
  */
 
-import { Plus, Network, Calendar, Trash2, Database, Copy, Check } from "lucide-react";
+import { Plus, Network, Calendar, Trash2, Copy, Check } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
 import { useState } from "react";
 
@@ -17,7 +17,6 @@ export default function InfrastructureDashboard({
   onCreateNew,
   onOpenDesign,
   onDeleteDesign,
-  onOpenRag,
 }: InfrastructureDashboardProps) {
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -49,13 +48,6 @@ export default function InfrastructureDashboard({
               View and manage your infrastructure diagrams
             </p>
           </div>
-          <button
-            onClick={onOpenRag}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-700 transition-colors"
-          >
-            <Database className="w-4 h-4 text-blue-400" />
-            <span>Knowledge Base (RAG)</span>
-          </button>
         </header>
 
         {error && (
