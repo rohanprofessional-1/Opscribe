@@ -130,3 +130,25 @@ class GraphVisualization(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     nodes: List[NodeRead]
     edges: List[EdgeRead]
+
+
+# Sync payload (frontend sends nodes/edges in designer format)
+class GraphSyncNode(BaseModel):
+    id: str
+    type: str
+    position: Dict[str, float]
+    data: Dict[str, Any]
+
+
+class GraphSyncEdge(BaseModel):
+    id: str
+    source: str
+    target: str
+    sourceHandle: Optional[str] = None
+    targetHandle: Optional[str] = None
+
+
+class GraphSyncUpdate(BaseModel):
+    name: Optional[str] = None
+    nodes: List[GraphSyncNode]
+    edges: List[GraphSyncEdge]

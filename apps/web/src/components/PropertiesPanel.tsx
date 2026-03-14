@@ -1,3 +1,10 @@
+/**
+ * This component is the properties panel for the infrastructure design
+ * and will be on the right side of the canvas.
+ * It displays the properties for a selected node and allows the user to edit them.
+ * It also allows the user to delete the current node.
+ */
+
 import type { Node } from "reactflow";
 import * as Icons from "lucide-react";
 import { X, Trash2 } from "lucide-react";

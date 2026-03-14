@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Github, Link as LinkIcon, CheckCircle, AlertCircle } from "lucide-react";
 
 const MOCK_CLIENT_ID = "123e4567-e89b-12d3-a456-426614174000";
-const API_BASE = "http://localhost:8000/api/v1";
+const API_BASE = "http://localhost:8000";
 
 interface Repository {
     name: string;

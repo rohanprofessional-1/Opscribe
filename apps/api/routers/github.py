@@ -19,7 +19,7 @@ router = APIRouter(
 
 GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "mock_client_id")
 GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "mock_client_secret")
-GITHUB_REDIRECT_URI = os.environ.get("GITHUB_REDIRECT_URI", "http://localhost:8000/api/v1/github/callback")
+GITHUB_REDIRECT_URI = os.environ.get("GITHUB_REDIRECT_URI", "http://localhost:8000/github/callback")
 WEBHOOK_SECRET = os.environ.get("GITHUB_WEBHOOK_SECRET", "mock_webhook_secret")
 
 @router.get("/login")
@@ -125,7 +125,7 @@ async def connect_repository(request: ConnectRepoRequest, session: Session = Dep
     try:
         parts = request.repo_url.replace("https://github.com/", "").split("/")
         owner, repo_name = parts[0], parts[1]
-        webhook_target = os.environ.get("PUBLIC_API_URL", "https://your-domain.ngrok-free.app") + "/api/v1/github/webhook"
+        webhook_target = os.environ.get("PUBLIC_API_URL", "https://your-domain.ngrok-free.app") + "/github/webhook"
         
         await gh_client.create_webhook(owner, repo_name, webhook_target, WEBHOOK_SECRET)
     except Exception as e:

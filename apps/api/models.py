@@ -16,12 +16,11 @@ class Client(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
     metadata_: Dict[str, Any] = Field(default={}, sa_column=Column("metadata", JSONB))
 
-    graphs: List["Graph"] = Relationship(back_populates="client")
-    node_types: List["NodeType"] = Relationship(back_populates="client")
-    edge_types: List["EdgeType"] = Relationship(back_populates="client")
-    nodes: List["Node"] = Relationship(back_populates="client")
-    edges: List["Edge"] = Relationship(back_populates="client")
-    connected_repositories: List["ConnectedRepository"] = Relationship(back_populates="client")
+    graphs: List["Graph"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    node_types: List["NodeType"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    edge_types: List["EdgeType"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    nodes: List["Node"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    edges: List["Edge"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 
 class ConnectedRepository(SQLModel, table=True):
@@ -40,7 +39,7 @@ class ConnectedRepository(SQLModel, table=True):
 
 class Graph(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    client_id: UUID = Field(foreign_key="client.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
     name: str
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=utc_now)
@@ -48,17 +47,17 @@ class Graph(SQLModel, table=True):
     settings: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB)) # layout defaults, visibility flags
 
     client: Client = Relationship(back_populates="graphs")
-    node_types: List["NodeType"] = Relationship(back_populates="graph")
-    edge_types: List["EdgeType"] = Relationship(back_populates="graph")
-    nodes: List["Node"] = Relationship(back_populates="graph")
-    edges: List["Edge"] = Relationship(back_populates="graph")
+    node_types: List["NodeType"] = Relationship(back_populates="graph", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    edge_types: List["EdgeType"] = Relationship(back_populates="graph", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    nodes: List["Node"] = Relationship(back_populates="graph", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    edges: List["Edge"] = Relationship(back_populates="graph", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 
 class NodeType(SQLModel, table=True):
     __tablename__ = "node_type"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    client_id: UUID = Field(foreign_key="client.id")
-    graph_id: UUID = Field(foreign_key="graph.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    graph_id: UUID = Field(foreign_key="graph.id", ondelete="CASCADE")
     name: str
     category: Optional[str] = None
     description: Optional[str] = None
@@ -78,8 +77,8 @@ class NodeType(SQLModel, table=True):
 class EdgeType(SQLModel, table=True):
     __tablename__ = "edge_type"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    client_id: UUID = Field(foreign_key="client.id")
-    graph_id: UUID = Field(foreign_key="graph.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    graph_id: UUID = Field(foreign_key="graph.id", ondelete="CASCADE")
     name: str
     
     # Relationship types / categorization
@@ -111,9 +110,9 @@ class EdgeType(SQLModel, table=True):
 
 class Node(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    client_id: UUID = Field(foreign_key="client.id")
-    graph_id: UUID = Field(foreign_key="graph.id")
-    node_type_id: UUID = Field(foreign_key="node_type.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    graph_id: UUID = Field(foreign_key="graph.id", ondelete="CASCADE")
+    node_type_id: UUID = Field(foreign_key="node_type.id", ondelete="CASCADE")
     key: str # unique identifier within the graph
     display_name: Optional[str] = None
     properties: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
@@ -137,11 +136,11 @@ class Node(SQLModel, table=True):
 
 class Edge(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    client_id: UUID = Field(foreign_key="client.id")
-    graph_id: UUID = Field(foreign_key="graph.id")
-    edge_type_id: UUID = Field(foreign_key="edge_type.id")
-    from_node_id: UUID = Field(foreign_key="node.id")
-    to_node_id: UUID = Field(foreign_key="node.id")
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    graph_id: UUID = Field(foreign_key="graph.id", ondelete="CASCADE")
+    edge_type_id: UUID = Field(foreign_key="edge_type.id", ondelete="CASCADE")
+    from_node_id: UUID = Field(foreign_key="node.id", ondelete="CASCADE")
+    to_node_id: UUID = Field(foreign_key="node.id", ondelete="CASCADE")
     properties: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
