@@ -11,7 +11,7 @@ from apps.api.ingestors.github.models import FileMetadata, ParseableFileSet
 
 class RepositoryWalker:
     def __init__(self, repo_url: str, branch: str, access_token: str):
-        self.repo_url = repo_url
+        self.repo_url = repo_url.rstrip("/")
         self.branch = branch
         self.access_token = access_token
 
@@ -19,7 +19,8 @@ class RepositoryWalker:
         if not self.access_token:
             return self.repo_url
         parsed = urlparse(self.repo_url)
-        return parsed._replace(netloc=f"oauth2:{self.access_token}@{parsed.netloc}").geturl()
+        # GitHub App installation tokens require 'x-access-token' as the username
+        return parsed._replace(netloc=f"x-access-token:{self.access_token}@{parsed.netloc}").geturl()
 
     async def _run_command(self, *args, cwd: Optional[str] = None) -> Tuple[str, str, int]:
         process = await asyncio.create_subprocess_exec(
@@ -75,7 +76,7 @@ class RepositoryWalker:
     async def clone_and_walk(self) -> ParseableFileSet:
         auth_url = self._get_auth_url()
         with tempfile.TemporaryDirectory() as temp_dir:
-            _, stderr, rc = await self._run_command(
+            stdout, stderr, rc = await self._run_command(
                 "git", "clone", "--depth=1", "--branch", self.branch, auth_url, ".", 
                 cwd=temp_dir
             )

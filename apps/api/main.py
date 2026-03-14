@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from apps.api.database import create_db_and_tables
-from apps.api.routers import clients, graphs, nodes, edges, discovery, github, pipeline
+from apps.api.routers import clients, graphs, nodes, edges, discovery, github, pipeline, admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,6 +40,7 @@ app.include_router(edges.router)
 app.include_router(github.router)
 app.include_router(discovery.router)
 app.include_router(pipeline.router)
+app.include_router(admin.router)
 
 @app.get("/health")
 async def health_check():

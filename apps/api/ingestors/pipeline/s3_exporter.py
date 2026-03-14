@@ -13,26 +13,44 @@ import json
 import logging
 from datetime import datetime, timezone
 from typing import Optional
+from dotenv import dotenv_values
 
 import boto3
 from botocore.exceptions import ClientError
 
 from apps.api.ingestors.aws.schemas import DiscoveryResult
+from apps.api.ingestors.pipeline.base import BaseExporter
 
 logger = logging.getLogger(__name__)
 
 
-class S3Exporter:
+class S3Exporter(BaseExporter):
     """Exports DiscoveryResult data to S3 per client_id."""
 
     def __init__(self):
-        self.s3 = boto3.client(
-            "s3",
-            region_name=os.environ.get("AWS_REGION", "us-east-1"),
-            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-        )
-        self.bucket = os.environ.get("OPSCRIBE_S3_BUCKET", "opscribe-data")
+        env = dotenv_values("apps/api/.env")
+        
+        endpoint_url = env.get("AWS_S3_ENDPOINT_URL") or os.environ.get("AWS_S3_ENDPOINT_URL")
+        region = env.get("AWS_REGION") or os.environ.get("AWS_REGION", "us-east-1")
+        access_key = env.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
+        secret_key = env.get("AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+        
+        client_kwargs = {
+            "service_name": "s3",
+            "region_name": region,
+            "aws_access_key_id": access_key,
+            "aws_secret_access_key": secret_key,
+        }
+        if endpoint_url:
+            client_kwargs["endpoint_url"] = endpoint_url
+
+        self.s3 = boto3.client(**client_kwargs)
+        self.bucket = env.get("OPSCRIBE_S3_BUCKET") or os.environ.get("OPSCRIBE_S3_BUCKET", "opscribe-data")
+        print(f"DEBUG: S3Exporter initialized with bucket: {self.bucket}, endpoint: {endpoint_url}")
+
+    @property
+    def backend_name(self) -> str:
+        return "s3"
 
     def _result_to_dict(self, result: DiscoveryResult) -> dict:
         """Serialize a DiscoveryResult to a JSON-serializable dict."""
@@ -97,12 +115,14 @@ class S3Exporter:
         history_key = f"{client_id}/history/{timestamp}.json"
 
         try:
+            print(f"DEBUG: Attempting to upload to s3://{self.bucket}/{latest_key}...")
             self.s3.put_object(
                 Bucket=self.bucket,
                 Key=latest_key,
                 Body=body.encode("utf-8"),
                 ContentType="application/json",
             )
+            print(f"DEBUG: Successfully uploaded to s3://{self.bucket}/{latest_key}")
             logger.info(f"Uploaded to s3://{self.bucket}/{latest_key}")
 
             # Also archive

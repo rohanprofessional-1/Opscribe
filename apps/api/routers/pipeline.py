@@ -9,11 +9,13 @@ from typing import Optional, List
 
 from apps.api.database import get_session
 from apps.api.models import Client, ConnectedRepository
-from apps.api.ingestors.aws.detector import AWSDetector
 from apps.api.ingestors.aws.schemas import DiscoveryResult
-from apps.api.ingestors.github.pipeline import GitHubIngestionPipeline
-from apps.api.ingestors.github.security import decrypt_token
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
+from apps.api.ingestors.pipeline.base import BaseIngestor, BaseExporter
+from apps.api.ingestors.pipeline.ingestors import AWSIngestor, GitHubIngestor, GitHubLinkIngestor
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/pipeline",
@@ -41,51 +43,30 @@ class ExportResponse(BaseModel):
 
 async def run_export(
     client_id: str,
-    include_aws: bool,
-    include_github: bool,
-    aws_region: str,
-    session: Session,
+    ingestors: List[BaseIngestor],
+    exporter: BaseExporter,
 ):
     """Background task to run full export pipeline."""
     results: List[DiscoveryResult] = []
 
-    # AWS Discovery
-    if include_aws:
+    print(f"DEBUG: Starting run_export for client {client_id}")
+    for ingestor in ingestors:
         try:
-            detector = AWSDetector(region_name=aws_region)
-            aws_result = await detector.discover()
-            results.append(aws_result)
+            print(f"DEBUG: Running ingestor {ingestor.source_name}...")
+            res = await ingestor.ingest()
+            print(f"DEBUG: Ingestor {ingestor.source_name} completed with {len(res)} results.")
+            results.extend(res)
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"AWS discovery failed: {e}")
-
-    # GitHub Repo Ingestion
-    if include_github:
-        statement = select(ConnectedRepository).where(
-            ConnectedRepository.client_id == client_id,
-        )
-        repos = session.exec(statement).all()
-
-        for repo in repos:
-            try:
-                token = decrypt_token(repo.github_access_token)
-                pipeline = GitHubIngestionPipeline(
-                    repo_url=repo.clone_url,
-                    branch=repo.default_branch or "main",
-                    access_token=token,
-                )
-                github_result = await pipeline.run()
-                results.append(github_result)
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).error(
-                    f"GitHub ingestion failed for {repo.clone_url}: {e}"
-                )
+            print(f"DEBUG: Ingestor '{ingestor.source_name}' failed: {e}")
+            logger.error(f"Ingestor '{ingestor.source_name}' failed: {e}")
 
     # Export to S3
     if results:
-        exporter = S3Exporter()
+        print(f"DEBUG: Exporting {len(results)} results to S3 for client {client_id}...")
         await exporter.export(client_id=client_id, results=results)
+        print("DEBUG: Export completed successfully.")
+    else:
+        print("DEBUG: No results to export.")
 
 
 @router.post("/export", response_model=ExportResponse)
@@ -100,13 +81,20 @@ async def trigger_export(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
+    ingestors: List[BaseIngestor] = []
+    if request.include_aws:
+        ingestors.append(AWSIngestor(region_name=request.aws_region))
+    
+    if request.include_github:
+        ingestors.append(GitHubIngestor(client_id=request.client_id, session=session))
+
+    exporter = S3Exporter()
+
     background_tasks.add_task(
         run_export,
         client_id=request.client_id,
-        include_aws=request.include_aws,
-        include_github=request.include_github,
-        aws_region=request.aws_region,
-        session=session,
+        ingestors=ingestors,
+        exporter=exporter,
     )
 
     return ExportResponse(
@@ -117,25 +105,17 @@ async def trigger_export(
 
 async def run_github_link(
     client_id: str,
+    ingestor: BaseIngestor,
+    exporter: BaseExporter,
     repo_url: str,
-    branch: str,
-    session: Session,
 ):
     try:
-        pipeline = GitHubIngestionPipeline(
-            repo_url=repo_url,
-            branch=branch,
-            access_token="",
-        )
-        github_result = await pipeline.run()
-        
-        # Export to S3
-        exporter = S3Exporter()
+        results = await ingestor.ingest()
         label = f"github_link_export_{repo_url.split('/')[-1] if '/' in repo_url else 'repo'}"
-        await exporter.export(client_id=client_id, results=[github_result], label=label)
+        if results:
+            await exporter.export(client_id=client_id, results=results, label=label)
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"GitHub link ingestion failed for {repo_url}: {e}")
+        logger.error(f"GitHub link ingestion failed for {repo_url}: {e}")
 
 
 @router.post("/github-link", response_model=ExportResponse)
@@ -149,12 +129,15 @@ async def trigger_github_link(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
+    ingestor = GitHubLinkIngestor(repo_url=request.repo_url, branch=request.branch)
+    exporter = S3Exporter()
+
     background_tasks.add_task(
         run_github_link,
         client_id=request.client_id,
+        ingestor=ingestor,
+        exporter=exporter,
         repo_url=request.repo_url,
-        branch=request.branch,
-        session=session,
     )
 
     return ExportResponse(

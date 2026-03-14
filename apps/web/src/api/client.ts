@@ -38,8 +38,8 @@ async function request<T>(
 }
 
 export const api = {
-  async getAnonSession(): Promise<ClientRead> {
-    return request<ClientRead>("clients/anon/session");
+  async getCurrentUser(): Promise<ClientRead> {
+    return request<ClientRead>("clients/me");
   },
 
   async listGraphs(clientId: string): Promise<GraphRead[]> {

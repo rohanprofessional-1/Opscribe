@@ -30,7 +30,8 @@ class ConnectedRepository(SQLModel, table=True):
     client_id: UUID = Field(foreign_key="client.id")
     repo_url: str
     default_branch: str
-    encrypted_access_token: str
+    installation_id: str
+    target_repo_id: str
     last_ingested_at: Optional[datetime] = None
     ingestion_status: Optional[str] = None
     created_at: datetime = Field(default_factory=utc_now)
