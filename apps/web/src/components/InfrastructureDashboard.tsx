@@ -5,8 +5,10 @@
  * It also allows the user to open a design and delete a design.
  */
 
-import { Plus, Network, Calendar, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
+import SettingsModal from "./SettingsModal";
 
 export default function InfrastructureDashboard({
   designs,
@@ -17,6 +19,8 @@ export default function InfrastructureDashboard({
   onOpenDesign,
   onDeleteDesign,
 }: InfrastructureDashboardProps) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     const now = new Date();
@@ -27,15 +31,24 @@ export default function InfrastructureDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8">
+    <div className="min-h-screen bg-gray-950 p-8 relative">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-10">
-          <h1 className="text-2xl font-bold text-white">
-            Infrastructure Designs
-          </h1>
-          <p className="text-gray-400 mt-1">
-            View and manage your infrastructure diagrams
-          </p>
+        <header className="mb-10 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              Infrastructure Designs
+            </h1>
+            <p className="text-gray-400 mt-1">
+              View and manage your infrastructure diagrams
+            </p>
+          </div>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center justify-center gap-2 p-2 px-3 border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium shadow-sm"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            Provider Settings
+          </button>
         </header>
 
         {error && (
@@ -49,70 +62,75 @@ export default function InfrastructureDashboard({
             Loading...
           </div>
         ) : (
-        <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <button
-            onClick={onCreateNew}
-            disabled={createPending}
-            className="aspect-square flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-600 bg-gray-900/50 hover:border-blue-500 hover:bg-gray-800/80 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-              <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-400" />
-            </div>
-            <span className="text-sm font-medium text-gray-400 group-hover:text-gray-300">
-              {createPending ? "Creating..." : "Create new design"}
-            </span>
-          </button>
-
-          {designs.map((design) => (
-            <div
-              key={design.id}
-              className="aspect-square flex flex-col rounded-xl border border-gray-700 bg-gray-900 hover:border-gray-600 transition-all overflow-hidden group cursor-pointer"
-            >
-              <div
-                onClick={() => onOpenDesign(design.id)}
-                className="flex-1 flex flex-col p-4"
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <button
+                onClick={onCreateNew}
+                disabled={createPending}
+                className="aspect-square flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-600 bg-gray-900/50 hover:border-blue-500 hover:bg-gray-800/80 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center">
-                    <Network className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteDesign(design.id);
-                    }}
-                    className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
-                    title="Delete design"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                  <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-400" />
                 </div>
-                <h3 className="mt-4 font-medium text-white truncate">
-                  {design.name}
-                </h3>
-                <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-gray-500">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {formatDate(design.updatedAt)}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {design.nodes.length} nodes · {design.edges.length}{" "}
-                  connections
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+                <span className="text-sm font-medium text-gray-400 group-hover:text-gray-300">
+                  {createPending ? "Creating..." : "Create new design"}
+                </span>
+              </button>
 
-        {designs.length === 0 && (
-          <p className="text-center text-gray-500 mt-12">
-            No designs yet. Click the card above to create your first
-            infrastructure.
-          </p>
-        )}
-        </>
+              {designs.map((design) => (
+                <div
+                  key={design.id}
+                  className="aspect-square flex flex-col rounded-xl border border-gray-700 bg-gray-900 hover:border-gray-600 transition-all overflow-hidden group cursor-pointer"
+                >
+                  <div
+                    onClick={() => onOpenDesign(design.id)}
+                    className="flex-1 flex flex-col p-4"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center">
+                        <Network className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteDesign(design.id);
+                        }}
+                        className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
+                        title="Delete design"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <h3 className="mt-4 font-medium text-white truncate">
+                      {design.name}
+                    </h3>
+                    <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-gray-500">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {formatDate(design.updatedAt)}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {design.nodes.length} nodes · {design.edges.length}{" "}
+                      connections
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {designs.length === 0 && (
+              <p className="text-center text-gray-500 mt-12">
+                No designs yet. Click the card above to create your first
+                infrastructure.
+              </p>
+            )}
+          </>
         )}
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }

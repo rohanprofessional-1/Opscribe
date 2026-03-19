@@ -22,6 +22,24 @@ class Client(SQLModel, table=True):
     nodes: List["Node"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     edges: List["Edge"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     connected_repositories: List["ConnectedRepository"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    integrations: List["ClientIntegration"] = Relationship(back_populates="client", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+
+
+class ClientIntegration(SQLModel, table=True):
+    __tablename__ = "client_integration"
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    client_id: UUID = Field(foreign_key="client.id", ondelete="CASCADE")
+    provider: str = Field(index=True) # e.g. 'aws', 's3', 'datadog'
+    credentials: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB)) # e.g. access_key, secret_key, region, bucket_name
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
+
+    client: Client = Relationship(back_populates="integrations")
+
+    __table_args__ = (
+        UniqueConstraint("client_id", "provider", name="unique_client_provider_integration"),
+    )
 
 
 class ConnectedRepository(SQLModel, table=True):

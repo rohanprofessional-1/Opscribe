@@ -91,6 +91,13 @@ async def get_repositories(client_id: UUID, session: Session = Depends(get_sessi
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch repositories: {str(e)}")
 
+@router.get("/connected-repos")
+async def get_connected_repos(client_id: UUID, session: Session = Depends(get_session)):
+    """Fetches the opscribe ConnectedRepository records to check ingestion status."""
+    statement = select(ConnectedRepository).where(ConnectedRepository.client_id == client_id)
+    repos = session.exec(statement).all()
+    return repos
+
 from pydantic import BaseModel
 
 class ConnectRepoRequest(BaseModel):

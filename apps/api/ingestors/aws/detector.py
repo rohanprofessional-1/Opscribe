@@ -24,12 +24,38 @@ class AWSServiceDetector:
         return None
 
 
+import os
+from dotenv import dotenv_values
+
 class AWSDetector(BaseDetector):
     """Comprehensive AWS infrastructure detector covering all major services"""
 
-    def __init__(self, region_name: str = "us-east-1"):
+    def __init__(self, region_name: str = "us-east-1", credentials: dict = None):
         self.region_name = region_name
+        self.credentials = credentials or {}
         self.account_id = None
+
+    def _get_client(self, service_name: str):
+        """Centralized factory for boto3 clients using DB credentials or .env fallback."""
+        env = dotenv_values("apps/api/.env")
+        
+        endpoint_url = self.credentials.get("endpoint_url") or env.get(f"AWS_{service_name.upper()}_ENDPOINT_URL") or os.environ.get(f"AWS_{service_name.upper()}_ENDPOINT_URL")
+        region = self.credentials.get("region") or env.get("AWS_REGION") or os.environ.get("AWS_REGION", self.region_name)
+        access_key = self.credentials.get("aws_access_key_id") or env.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
+        secret_key = self.credentials.get("aws_secret_access_key") or env.get("AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+        
+        client_kwargs = {
+            "service_name": service_name,
+            "region_name": region,
+            "aws_access_key_id": access_key,
+            "aws_secret_access_key": secret_key,
+        }
+        
+        # S3 local endpoint support (e.g., MinIO)
+        if service_name == "s3" and endpoint_url:
+            client_kwargs["endpoint_url"] = endpoint_url
+            
+        return boto3.client(**client_kwargs)
 
     @property
     def source_name(self) -> str:
@@ -54,7 +80,7 @@ class AWSDetector(BaseDetector):
         """Get AWS account ID"""
         if not self.account_id:
             try:
-                sts = boto3.client("sts", region_name=self.region_name)
+                sts = self._get_client("sts")
                 self.account_id = sts.get_caller_identity()["Account"]
             except Exception as e:
                 logger.warning(f"Could not retrieve account ID: {e}")
@@ -174,7 +200,7 @@ class AWSDetector(BaseDetector):
         """Discover EC2 instances"""
         nodes = []
         try:
-            ec2 = boto3.client("ec2", region_name=self.region_name)
+            ec2 = self._get_client("ec2")
             response = ec2.describe_instances()
 
             for reservation in response.get("Reservations", []):
@@ -224,7 +250,7 @@ class AWSDetector(BaseDetector):
         """Discover Lambda functions"""
         nodes = []
         try:
-            lambda_client = boto3.client("lambda", region_name=self.region_name)
+            lambda_client = self._get_client("lambda")
             paginator = lambda_client.get_paginator("list_functions")
 
             for page in paginator.paginate():
@@ -261,7 +287,7 @@ class AWSDetector(BaseDetector):
         """Discover ECS clusters and services"""
         nodes = []
         try:
-            ecs = boto3.client("ecs", region_name=self.region_name)
+            ecs = self._get_client("ecs")
             clusters = ecs.list_clusters().get("clusterArns", [])
 
             for cluster_arn in clusters:
@@ -307,7 +333,7 @@ class AWSDetector(BaseDetector):
         """Discover EKS clusters"""
         nodes = []
         try:
-            eks = boto3.client("eks", region_name=self.region_name)
+            eks = self._get_client("eks")
             clusters = eks.list_clusters().get("clusters", [])
 
             for cluster_name in clusters:
@@ -340,7 +366,7 @@ class AWSDetector(BaseDetector):
         """Discover S3 buckets"""
         nodes = []
         try:
-            s3 = boto3.client("s3", region_name=self.region_name)
+            s3 = self._get_client("s3")
             response = s3.list_buckets()
 
             for bucket in response.get("Buckets", []):
@@ -391,7 +417,7 @@ class AWSDetector(BaseDetector):
         """Discover EBS volumes"""
         nodes = []
         try:
-            ec2 = boto3.client("ec2", region_name=self.region_name)
+            ec2 = self._get_client("ec2")
             response = ec2.describe_volumes()
 
             for volume in response.get("Volumes", []):
@@ -429,7 +455,7 @@ class AWSDetector(BaseDetector):
         """Discover EFS file systems"""
         nodes = []
         try:
-            efs = boto3.client("efs", region_name=self.region_name)
+            efs = self._get_client("efs")
             response = efs.describe_file_systems()
 
             for fs in response.get("FileSystems", []):
@@ -461,7 +487,7 @@ class AWSDetector(BaseDetector):
         """Discover FSx file systems"""
         nodes = []
         try:
-            fsx = boto3.client("fsx", region_name=self.region_name)
+            fsx = self._get_client("fsx")
             response = fsx.describe_file_systems()
 
             for fs in response.get("FileSystems", []):
@@ -493,7 +519,7 @@ class AWSDetector(BaseDetector):
         """Discover RDS instances and Aurora clusters"""
         nodes = []
         try:
-            rds = boto3.client("rds", region_name=self.region_name)
+            rds = self._get_client("rds")
 
             # RDS Instances
             response = rds.describe_db_instances()
@@ -554,7 +580,7 @@ class AWSDetector(BaseDetector):
         """Discover DynamoDB tables"""
         nodes = []
         try:
-            dynamodb = boto3.client("dynamodb", region_name=self.region_name)
+            dynamodb = self._get_client("dynamodb")
             response = dynamodb.list_tables()
 
             for table_name in response.get("TableNames", []):
@@ -586,7 +612,7 @@ class AWSDetector(BaseDetector):
         """Discover Redshift clusters"""
         nodes = []
         try:
-            redshift = boto3.client("redshift", region_name=self.region_name)
+            redshift = self._get_client("redshift")
             response = redshift.describe_clusters()
 
             for cluster in response.get("Clusters", []):
@@ -621,7 +647,7 @@ class AWSDetector(BaseDetector):
         """Discover VPCs"""
         nodes = []
         try:
-            ec2 = boto3.client("ec2", region_name=self.region_name)
+            ec2 = self._get_client("ec2")
             response = ec2.describe_vpcs()
 
             for vpc in response.get("Vpcs", []):
@@ -655,7 +681,7 @@ class AWSDetector(BaseDetector):
         """Discover ALB, NLB, and ELB load balancers"""
         nodes = []
         try:
-            elb_v2 = boto3.client("elbv2", region_name=self.region_name)
+            elb_v2 = self._get_client("elbv2")
             response = elb_v2.describe_load_balancers()
 
             for lb in response.get("LoadBalancers", []):
@@ -689,7 +715,7 @@ class AWSDetector(BaseDetector):
         """Discover CloudFront distributions"""
         nodes = []
         try:
-            cloudfront = boto3.client("cloudfront", region_name=self.region_name)
+            cloudfront = self._get_client("cloudfront")
             response = cloudfront.list_distributions()
 
             for dist in response.get("DistributionList", {}).get("Items", []):
@@ -726,7 +752,7 @@ class AWSDetector(BaseDetector):
         """Discover Direct Connect connections"""
         nodes = []
         try:
-            dx = boto3.client("directconnect", region_name=self.region_name)
+            dx = self._get_client("directconnect")
             response = dx.describe_connections()
 
             for conn in response.get("connections", []):
@@ -761,7 +787,7 @@ class AWSDetector(BaseDetector):
         """Discover IAM roles"""
         nodes = []
         try:
-            iam = boto3.client("iam")
+            iam = self._get_client("iam")
             response = iam.list_roles()
 
             for role in response.get("Roles", []):
@@ -793,7 +819,7 @@ class AWSDetector(BaseDetector):
         """Discover KMS keys"""
         nodes = []
         try:
-            kms = boto3.client("kms", region_name=self.region_name)
+            kms = self._get_client("kms")
             response = kms.list_keys()
 
             for key in response.get("Keys", []):
@@ -824,7 +850,7 @@ class AWSDetector(BaseDetector):
         """Discover Secrets Manager secrets"""
         nodes = []
         try:
-            secrets = boto3.client("secretsmanager", region_name=self.region_name)
+            secrets = self._get_client("secretsmanager")
             response = secrets.list_secrets()
 
             for secret in response.get("SecretList", []):
@@ -855,7 +881,7 @@ class AWSDetector(BaseDetector):
         """Discover AWS Directory Service directories"""
         nodes = []
         try:
-            ds = boto3.client("ds", region_name=self.region_name)
+            ds = self._get_client("ds")
             response = ds.describe_directories()
 
             for directory in response.get("DirectoryDescriptions", []):
@@ -890,7 +916,7 @@ class AWSDetector(BaseDetector):
         """Discover CloudWatch log groups"""
         nodes = []
         try:
-            logs = boto3.client("logs", region_name=self.region_name)
+            logs = self._get_client("logs")
             response = logs.describe_log_groups()
 
             for log_group in response.get("logGroups", []):
@@ -920,7 +946,7 @@ class AWSDetector(BaseDetector):
         """Discover CloudTrail trails"""
         nodes = []
         try:
-            cloudtrail = boto3.client("cloudtrail", region_name=self.region_name)
+            cloudtrail = self._get_client("cloudtrail")
             response = cloudtrail.describe_trails()
 
             for trail in response.get("trailList", []):
@@ -951,7 +977,7 @@ class AWSDetector(BaseDetector):
         """Discover Systems Manager resources"""
         nodes = []
         try:
-            ssm = boto3.client("ssm", region_name=self.region_name)
+            ssm = self._get_client("ssm")
 
             # Parameters
             response = ssm.describe_parameters()
@@ -984,7 +1010,7 @@ class AWSDetector(BaseDetector):
         """Discover SQS queues"""
         nodes = []
         try:
-            sqs = boto3.client("sqs", region_name=self.region_name)
+            sqs = self._get_client("sqs")
             response = sqs.list_queues()
 
             for queue_url in response.get("QueueUrls", []):
@@ -1013,7 +1039,7 @@ class AWSDetector(BaseDetector):
         """Discover SNS topics"""
         nodes = []
         try:
-            sns = boto3.client("sns", region_name=self.region_name)
+            sns = self._get_client("sns")
             response = sns.list_topics()
 
             for topic in response.get("Topics", []):
@@ -1042,7 +1068,7 @@ class AWSDetector(BaseDetector):
         """Discover EventBridge rules"""
         nodes = []
         try:
-            events = boto3.client("events", region_name=self.region_name)
+            events = self._get_client("events")
             response = events.list_rules()
 
             for rule in response.get("Rules", []):
@@ -1073,7 +1099,7 @@ class AWSDetector(BaseDetector):
         """Discover API Gateway APIs"""
         nodes = []
         try:
-            apigw = boto3.client("apigateway", region_name=self.region_name)
+            apigw = self._get_client("apigateway")
             response = apigw.get_rest_apis()
 
             for api in response.get("items", []):
@@ -1109,7 +1135,7 @@ class AWSDetector(BaseDetector):
         node_map = {node.key: node for node in nodes}
 
         try:
-            ec2 = boto3.client("ec2", region_name=self.region_name)
+            ec2 = self._get_client("ec2")
 
             # EC2 -> EBS Volume attachments
             for node in nodes:

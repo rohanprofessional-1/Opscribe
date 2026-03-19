@@ -8,66 +8,10 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 from apps.api.database import get_session
-from apps.api.models import Client, ConnectedRepository
-from apps.api.ingestors.aws.schemas import DiscoveryResult
-from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
-from apps.api.ingestors.pipeline.base import BaseIngestor, BaseExporter
-from apps.api.ingestors.pipeline.ingestors import AWSIngestor, GitHubIngestor, GitHubLinkIngestor
-import logging
+from apps.api.models import Client, ConnectedRepository, ClientIntegration
+from apps.api.utils.encryption import decrypt_dict
 
-logger = logging.getLogger(__name__)
-
-router = APIRouter(
-    prefix="/pipeline",
-    tags=["Pipeline"],
-)
-
-
-class ExportRequest(BaseModel):
-    client_id: str
-    include_aws: bool = True
-    include_github: bool = True
-    aws_region: str = "us-east-1"
-
-
-class GithubLinkRequest(BaseModel):
-    repo_url: str
-    client_id: str
-    branch: str = "main"
-
-
-class ExportResponse(BaseModel):
-    status: str
-    message: str
-
-
-async def run_export(
-    client_id: str,
-    ingestors: List[BaseIngestor],
-    exporter: BaseExporter,
-):
-    """Background task to run full export pipeline."""
-    results: List[DiscoveryResult] = []
-
-    print(f"DEBUG: Starting run_export for client {client_id}")
-    for ingestor in ingestors:
-        try:
-            print(f"DEBUG: Running ingestor {ingestor.source_name}...")
-            res = await ingestor.ingest()
-            print(f"DEBUG: Ingestor {ingestor.source_name} completed with {len(res)} results.")
-            results.extend(res)
-        except Exception as e:
-            print(f"DEBUG: Ingestor '{ingestor.source_name}' failed: {e}")
-            logger.error(f"Ingestor '{ingestor.source_name}' failed: {e}")
-
-    # Export to S3
-    if results:
-        print(f"DEBUG: Exporting {len(results)} results to S3 for client {client_id}...")
-        await exporter.export(client_id=client_id, results=results)
-        print("DEBUG: Export completed successfully.")
-    else:
-        print("DEBUG: No results to export.")
-
+# ... existing code ...
 
 @router.post("/export", response_model=ExportResponse)
 async def trigger_export(
@@ -81,9 +25,22 @@ async def trigger_export(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
+    # Fetch active client integrations
+    aws_integration = session.exec(
+        select(ClientIntegration).where(
+            ClientIntegration.client_id == request.client_id,
+            ClientIntegration.provider == "aws",
+            ClientIntegration.is_active == True
+        )
+    ).first()
+
+    # Keys to decrypt if present
+    sensitive_keys = ["aws_secret_access_key", "secret_key"]
+
     ingestors: List[BaseIngestor] = []
     if request.include_aws:
-        ingestors.append(AWSIngestor(region_name=request.aws_region))
+        aws_creds = decrypt_dict(aws_integration.credentials, sensitive_keys) if aws_integration else {}
+        ingestors.append(AWSIngestor(region_name=request.aws_region, credentials=aws_creds))
     
     if request.include_github:
         ingestors.append(GitHubIngestor(client_id=request.client_id, session=session))

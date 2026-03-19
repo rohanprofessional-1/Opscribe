@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class AWSIngestor(BaseIngestor):
-    def __init__(self, region_name: str = "us-east-1"):
+    def __init__(self, region_name: str = "us-east-1", credentials: dict = None):
         self.region_name = region_name
+        self.credentials = credentials or {}
 
     @property
     def source_name(self) -> str:
@@ -27,7 +28,7 @@ class AWSIngestor(BaseIngestor):
 
     async def ingest(self) -> List[DiscoveryResult]:
         try:
-            detector = AWSDetector(region_name=self.region_name)
+            detector = AWSDetector(region_name=self.region_name, credentials=self.credentials)
             result = await detector.discover()
             return [result]
         except Exception as e:
