@@ -131,6 +131,12 @@ class GraphVisualization(BaseModel):
     nodes: List[NodeRead]
     edges: List[EdgeRead]
 
+# Discovery Schemas
+class DiscoveryRequest(BaseModel):
+    client_id: UUID
+    graph_id: UUID
+    source_names: Optional[List[str]] = ["aws"]
+    include_relationships: bool = True
 
 # Sync payload (frontend sends nodes/edges in designer format)
 class GraphSyncNode(BaseModel):

@@ -28,7 +28,7 @@ export function useInfrastructureDesigns() {
     setLoading(true);
     setError(null);
     api
-      .getAnonSession()
+      .getCurrentUser()
       .then((client) => {
         if (cancelled) return;
         setClientId(client.id);

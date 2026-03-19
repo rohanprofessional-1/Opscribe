@@ -23,6 +23,7 @@ import "reactflow/dist/style.css";
 import { ArrowLeft, Bot } from "lucide-react";
 
 import NodePalette from "./NodePalette";
+import GithubConnectPanel from "./GithubConnectPanel";
 import PropertiesPanel from "./PropertiesPanel";
 import RAGChat from "./RAGChat";
 import InfrastructureNode from "./InfrastructureNode";
@@ -91,8 +92,8 @@ export default function InfrastructureDesigner({
   const [clientId, setClientId] = useState<string>("");
 
   useEffect(() => {
-    // Initialize an anonymous session to track RAG queries and metadata for the current user
-    api.getAnonSession().then((c) => setClientId(c.id));
+    // Fetch the current authenticated user session to track RAG queries and metadata
+    api.getCurrentUser().then((c) => setClientId(c.id)).catch(console.error);
   }, []);
 
   // Load nodes/edges from API when opening a graph by id (UUID) that has no nodes yet
@@ -287,6 +288,7 @@ export default function InfrastructureDesigner({
   return (
     <div className="flex h-screen bg-gray-950">
       <NodePalette onDragStart={onDragStart} />
+      <GithubConnectPanel />
 
       <div className="flex-1 relative" ref={reactFlowWrapper}>
         {loadingVisualization && (

@@ -5,9 +5,10 @@
  * It also allows the user to open a design and delete a design.
  */
 
-import { Plus, Network, Calendar, Trash2, Copy, Check } from "lucide-react";
-import type { InfrastructureDashboardProps } from "../types/infrastructure";
 import { useState } from "react";
+import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon } from "lucide-react";
+import type { InfrastructureDashboardProps } from "../types/infrastructure";
+import SettingsModal from "./SettingsModal";
 
 export default function InfrastructureDashboard({
   designs,
@@ -18,6 +19,8 @@ export default function InfrastructureDashboard({
   onOpenDesign,
   onDeleteDesign,
 }: InfrastructureDashboardProps) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     const now = new Date();
@@ -37,9 +40,9 @@ export default function InfrastructureDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8">
+    <div className="min-h-screen bg-gray-950 p-8 relative">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-10 flex items-start justify-between">
+        <header className="mb-10 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold text-white">
               Infrastructure Designs
@@ -48,6 +51,13 @@ export default function InfrastructureDashboard({
               View and manage your infrastructure diagrams
             </p>
           </div>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center justify-center gap-2 p-2 px-3 border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium shadow-sm"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            Provider Settings
+          </button>
         </header>
 
         {error && (
@@ -103,20 +113,6 @@ export default function InfrastructureDashboard({
                     <h3 className="mt-4 font-medium text-white truncate">
                       {design.name}
                     </h3>
-                    <div
-                      className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors cursor-copy"
-                      onClick={(e) => handleCopyId(e, design.id)}
-                      title="Copy Graph ID"
-                    >
-                      {copiedId === design.id ? (
-                        <Check className="w-3 h-3 text-green-400" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                      <span className="font-mono text-[10px] truncate max-w-[120px]">
-                        {design.id}
-                      </span>
-                    </div>
                     <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-gray-500">
                       <Calendar className="w-3.5 h-3.5" />
                       {formatDate(design.updatedAt)}
@@ -139,6 +135,11 @@ export default function InfrastructureDashboard({
           </>
         )}
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }

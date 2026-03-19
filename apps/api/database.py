@@ -18,6 +18,10 @@ def create_db_and_tables():
     
     # Ensure the pgvector extension is enabled before creating tables
     with engine.begin() as conn:
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        
-    SQLModel.metadata.create_all(engine)
+        try:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        except Exception as e:
+            # Typically fails if user is not superuser, but vector is built into the ankane image
+            print(f"Skipping vector extension creation: {e}")
+            
+    # Table creation is now handled automatically by Alembic migrations on startup
