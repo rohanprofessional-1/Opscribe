@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, inspect, text
 import os
 
-# Connect to localhost:5432 (local Postgres)
-DATABASE_URL = "postgresql://user:password@localhost:5432/opscribe"
+# Connect to localhost:5433 (local Postgres)
+DATABASE_URL = "postgresql://user:password@127.0.0.1:5433/opscribe"
 engine = create_engine(DATABASE_URL)
 
 def show_schema_and_data():

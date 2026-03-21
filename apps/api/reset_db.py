@@ -1,5 +1,10 @@
 import os
+import sys
 import shutil
+
+# Add the project root to the python path so 'apps' can be resolved
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from sqlmodel import SQLModel
 from sqlalchemy import text
 from apps.api.database import engine

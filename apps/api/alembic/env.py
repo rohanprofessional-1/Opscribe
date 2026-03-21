@@ -17,7 +17,7 @@ from apps.api.infrastructure.rag import models as rag_models
 # Use the directory of this file to find the .env in apps/api/
 api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 envvars = dotenv_values(os.path.join(api_dir, ".env"))
-database_url = envvars.get("DATABASE_URL") or os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/opscribe")
+database_url = envvars.get("DATABASE_URL") or os.environ.get("DATABASE_URL", "postgresql://user:password@127.0.0.1:5433/opscribe")
 print(f"DEBUG: Alembic using database_url={database_url}")
 
 # this is the Alembic Config object, which provides
