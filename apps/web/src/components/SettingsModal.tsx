@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Settings, Database, Github, CheckCircle, AlertCircle, Play } from "lucide-react";
 
-const MOCK_CLIENT_ID = "123e4567-e89b-12d3-a456-426614174000";
 const API_BASE = "http://localhost:8000";
 
 interface SettingsModalProps {
@@ -12,6 +11,15 @@ interface SettingsModalProps {
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const [activeTab, setActiveTab] = useState<"aws" | "repos">("aws");
 
+    // Real client ID — fetched from /clients/me on mount
+    const [clientId, setClientId] = useState<string | null>(null);
+    useEffect(() => {
+        fetch(`${API_BASE}/clients/me`)
+            .then(r => r.json())
+            .then(d => setClientId(d.id))
+            .catch(() => console.error("Could not load client session from /clients/me"));
+    }, []);
+
     // AWS State
     const [authMethod, setAuthMethod] = useState<"role" | "keys">("role");
     const [awsRegion, setAwsRegion] = useState("us-east-1");
@@ -21,6 +29,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const [awsSecretKey, setAwsSecretKey] = useState("");
     const [awsStatus, setAwsStatus] = useState<{ type: "success" | "error", text: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Github App install URL (fetched dynamically from backend)
+    const [githubInstallUrl, setGithubInstallUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetch(`${API_BASE}/github/config`)
+            .then(r => r.json())
+            .then(d => setGithubInstallUrl(d.app_install_url))
+            .catch(() => setGithubInstallUrl(null));
+    }, []);
 
     // Repo State
     const [repos, setRepos] = useState<any[]>([]);
@@ -36,7 +54,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
     const fetchIntegrations = async () => {
         try {
-            await fetch(`${API_BASE}/integrations/?client_id=${MOCK_CLIENT_ID}`);
+            await fetch(`${API_BASE}/integrations/?client_id=${clientId}`);
             // We only see what's configured, we don't get the secret keys back
             // so we don't strictly prepopulate the form with secrets, just placeholders or visual indicators.
         } catch (e) {
@@ -47,7 +65,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const fetchRepos = async () => {
         setLoadingRepos(true);
         try {
-            const res = await fetch(`${API_BASE}/github/connected-repos?client_id=${MOCK_CLIENT_ID}`);
+            const res = await fetch(`${API_BASE}/github/connected-repos?client_id=${clientId}`);
             const data = await res.json();
             setRepos(data);
         } catch (e) {
@@ -72,7 +90,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             }
 
             if (Object.keys(credentialsPayload).length > 1) {
-                await fetch(`${API_BASE}/integrations/aws?client_id=${MOCK_CLIENT_ID}`, {
+                await fetch(`${API_BASE}/integrations/aws?client_id=${clientId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ credentials: credentialsPayload })
@@ -100,7 +118,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    client_id: MOCK_CLIENT_ID,
+                    client_id: clientId,
                     include_aws: false,
                     include_github: true
                 })
@@ -247,14 +265,39 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                     {activeTab === "repos" && (
                         <div>
-                            <div className="flex justify-between items-center mb-6">
-                                <div>
-                                    <h3 className="text-sm font-medium text-white">Connected Repositories</h3>
-                                    <p className="text-xs text-gray-400 mt-1">Repositories managed by your GitHub App Installation.</p>
+                            {/* Step 1: Install GitHub App */}
+                            <div className="mb-6 bg-gray-800/50 border border-gray-700 rounded-xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-semibold text-white mb-1">Install the Opscribe GitHub App</h3>
+                                        <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                                            Authorize Opscribe to read your repositories by installing the GitHub App on your organization or account.
+                                            After installation, GitHub will redirect you back automatically.
+                                        </p>
+                                        {githubInstallUrl ? (
+                                            <a
+                                                href={githubInstallUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-xs font-medium border border-gray-600 transition-colors"
+                                            >
+                                                <Github className="w-4 h-4" /> Install GitHub App
+                                            </a>
+                                        ) : (
+                                            <span className="text-xs text-yellow-500">⚠ GITHUB_APP_SLUG not configured on server</span>
+                                        )}
+                                    </div>
                                 </div>
-                                <a href="http://localhost:8000/github/login?client_id=123e4567-e89b-12d3-a456-426614174000" className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-xs font-medium border border-gray-700 flex items-center gap-2 transition-colors">
-                                    <Github className="w-4 h-4" /> Install App
-                                </a>
+                            </div>
+
+                            {/* Step 2: Connected Repos */}
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-6 h-6 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-white">Connected Repositories</h3>
+                                    <p className="text-xs text-gray-400">Repositories that will be ingested into the knowledge graph.</p>
+                                </div>
                             </div>
 
                             {loadingRepos ? (
