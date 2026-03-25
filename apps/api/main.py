@@ -31,6 +31,11 @@ async def lifespan(app: FastAPI):
     print("Starting Opscribe API...")
     create_db_and_tables()
     run_migrations()
+    
+    # Ensure local dev data is present (Added for local testing)
+    from apps.api.database import seed_dev_data
+    seed_dev_data()
+    
     yield
     # Clean up resources
     print("Shutting down Opscribe API...")

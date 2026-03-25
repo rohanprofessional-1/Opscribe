@@ -20,9 +20,8 @@ import tempfile
 import subprocess
 import logging
 from typing import List, Optional
-from urllib.parse import urlparse
-
 from apps.api.ingestors.github.walker import RepositoryWalker
+from apps.api.ingestors.github.utils import _get_auth_url
 from apps.api.ingestors.github.deterministic import IaCParser, DependencyParser
 from apps.api.ingestors.github.semantic import SemanticParser
 from apps.api.ingestors.github.aggregator import SignalAggregator
@@ -66,23 +65,12 @@ class GitHubIngestionPipeline:
         self.use_semantic = use_semantic
         self.semantic_model = semantic_model
 
-    def _get_auth_url(self) -> str:
-        if not self.access_token:
-            return self.repo_url
-        parsed = urlparse(self.repo_url)
-        # GitHub App installation tokens require 'x-access-token' as the username
-        return parsed._replace(netloc=f"x-access-token:{self.access_token}@{parsed.netloc}").geturl()
-
     async def run(self) -> DiscoveryResult:
         """Execute the full ingestion pipeline and return a DiscoveryResult."""
         logger.info(f"Starting GitHub ingestion for {self.repo_url} on branch {self.branch}")
 
-        # Step 1: Walk and clone the repo using RepositoryWalker
-        walker = RepositoryWalker(
-            repo_url=self.repo_url,
-            branch=self.branch,
-            access_token=self.access_token,
-        )
+        # Step 1: Walk to get metadata using RepositoryWalker
+        walker = RepositoryWalker()
         
         # We still need a temp directory to read the file contents during parsing
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -92,7 +80,7 @@ class GitHubIngestionPipeline:
             # but we need the files locally to read them.
             
             # Re-implementing the Step 1 clone with the CORRECT auth url
-            auth_url = self._get_auth_url()
+            auth_url = _get_auth_url(self.repo_url, self.access_token)
             process = await asyncio.create_subprocess_exec(
                 "git", "clone", "--depth=1", "--branch", self.branch, auth_url, ".",
                 cwd=temp_dir,
@@ -106,9 +94,11 @@ class GitHubIngestionPipeline:
             logger.info(f"Cloned {self.repo_url} successfully")
 
             # Step 2: Use the already cloned directory to perform the walk
-            # This is slightly hacky because walker usually clones itself, 
-            # but we'll use a local instance to just filter the metadata.
-            file_set = await walker.clone_and_walk()
+            file_set = await walker.clone_and_walk(
+                repo_url=self.repo_url,
+                branch=self.branch,
+                access_token=self.access_token
+            )
 
             logger.info(
                 f"Found {len(file_set.tier_1_files)} Tier 1 and "

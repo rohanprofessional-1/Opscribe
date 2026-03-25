@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlmodel import Session, select
 from pydantic import BaseModel
 from typing import Optional, List
+from uuid import UUID
 
 from apps.api.database import get_session
 from apps.api.models import Client, ConnectedRepository, ClientIntegration
@@ -30,7 +31,7 @@ class ExportRequest(BaseModel):
     aws_region: str = "us-east-1"
 
 class GithubLinkRequest(BaseModel):
-    client_id: str
+    client_id: UUID
     repo_url: str
     branch: Optional[str] = "main"
 
@@ -124,9 +125,12 @@ async def trigger_github_link(
     session: Session = Depends(get_session),
 ):
     """Trigger a background ingestion of a public GitHub URL directly to S3."""
+    logger.info(f"Triggering public GitHub ingestion for client {request.client_id} (URL: {request.repo_url})")
+    
     client = session.get(Client, request.client_id)
     if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
+        logger.warning(f"Public ingestion failed: Client ID {request.client_id} not found in database.")
+        raise HTTPException(status_code=404, detail=f"Client {request.client_id} not found. Please ensure your tenant ID is correct.")
 
     ingestor = GitHubLinkIngestor(repo_url=request.repo_url, branch=request.branch)
     exporter = S3Exporter()

@@ -5,23 +5,11 @@ import fnmatch
 import subprocess
 from typing import List, Tuple, Optional
 from pathlib import Path
-from urllib.parse import urlparse
 
 from apps.api.ingestors.github.models import FileMetadata, ParseableFileSet
+from apps.api.ingestors.github.utils import _get_auth_url
 
 class RepositoryWalker:
-    def __init__(self, repo_url: str, branch: str, access_token: str):
-        self.repo_url = repo_url.rstrip("/")
-        self.branch = branch
-        self.access_token = access_token
-
-    def _get_auth_url(self) -> str:
-        if not self.access_token:
-            return self.repo_url
-        parsed = urlparse(self.repo_url)
-        # GitHub App installation tokens require 'x-access-token' as the username
-        return parsed._replace(netloc=f"x-access-token:{self.access_token}@{parsed.netloc}").geturl()
-
     async def _run_command(self, *args, cwd: Optional[str] = None) -> Tuple[str, str, int]:
         process = await asyncio.create_subprocess_exec(
             *args,
@@ -58,7 +46,7 @@ class RepositoryWalker:
             
         return False
 
-    def _should_skip(self, rel_path: str) -> bool:
+    def _is_tier_3(self, rel_path: str) -> bool:
         """Tier 3: Skip defaults (modules, git internals, tests, lockfiles)"""
         skip_dirs = {".git", "node_modules", "venv", "__pycache__", ".venv"}
         parts = Path(rel_path).parts
@@ -73,11 +61,11 @@ class RepositoryWalker:
             
         return False
 
-    async def clone_and_walk(self) -> ParseableFileSet:
-        auth_url = self._get_auth_url()
+    async def clone_and_walk(self, repo_url: str, branch: str, access_token: str) -> ParseableFileSet:
+        auth_url = _get_auth_url(repo_url, access_token)
         with tempfile.TemporaryDirectory() as temp_dir:
             stdout, stderr, rc = await self._run_command(
-                "git", "clone", "--depth=1", "--branch", self.branch, auth_url, ".", 
+                "git", "clone", "--depth=1", "--branch", branch, auth_url, ".", 
                 cwd=temp_dir
             )
             if rc != 0:
@@ -95,7 +83,7 @@ class RepositoryWalker:
                     full_path = os.path.join(root, file)
                     rel_path = os.path.relpath(full_path, temp_dir)
                     
-                    if self._should_skip(rel_path):
+                    if self._is_tier_3(rel_path):
                         continue
 
                     is_t1 = self._is_tier_1(file)

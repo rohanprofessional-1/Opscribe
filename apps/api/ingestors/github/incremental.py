@@ -142,8 +142,7 @@ class IncrementalUpdater:
         start = 0
         while start < len(content):
             end = start + max_chunk_size
-            # Bypass type checker string slice limitation
-            chunks.append(content[start:end])  # type: ignore
+            chunks.append(content[start:end]) # type: ignore
             start = end - overlap
             
         dummy_graph_id = self.tenant_id
