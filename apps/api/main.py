@@ -9,6 +9,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 from apps.api.database import create_db_and_tables
 from apps.api.routers import clients, graphs, nodes, edges, discovery, github, pipeline, admin, rag
+from apps.api.routers.admin import bootstrap_github_app_from_env
 from alembic.config import Config
 from alembic import command
 
@@ -17,7 +18,6 @@ def run_migrations():
     api_dir = os.path.dirname(__file__)
     alembic_ini_path = os.path.join(api_dir, "alembic.ini")
     alembic_cfg = Config(alembic_ini_path)
-    # Important: Set the script_location because alembic.ini might have it relative
     alembic_cfg.set_main_option("script_location", os.path.join(api_dir, "alembic"))
     try:
         command.upgrade(alembic_cfg, "head")
@@ -31,6 +31,11 @@ async def lifespan(app: FastAPI):
     print("Starting Opscribe API...")
     create_db_and_tables()
     run_migrations()
+    # Seed GitHub App credentials from env into DB on first boot
+    from sqlmodel import Session
+    from apps.api.database import engine
+    with Session(engine) as session:
+        bootstrap_github_app_from_env(session)
     yield
     # Clean up resources
     print("Shutting down Opscribe API...")
