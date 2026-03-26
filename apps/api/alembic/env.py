@@ -11,7 +11,7 @@ from sqlmodel import SQLModel, text
 
 # Import models to ensure they are registered in the metadata
 from apps.api import models
-from apps.api.infrastructure.rag import models as rag_models
+from apps.api.ai_infrastructure.rag import models as rag_models
 
 # Load environment variables
 # Use the directory of this file to find the .env in apps/api/

@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from typing import List, Any, Dict, Optional
 
 from apps.api.database import get_session
-from apps.api.infrastructure.rag.repo_ingestor import RepoIngestor
-from apps.api.infrastructure.rag.ingestor import GraphIngestor
-from apps.api.infrastructure.rag.retriever import GraphRetriever
+from apps.api.ai_infrastructure.rag.repo_ingestor import RepoIngestor
+from apps.api.ai_infrastructure.rag.ingestor import GraphIngestor
+from apps.api.ai_infrastructure.rag.retriever import GraphRetriever
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
@@ -27,7 +27,7 @@ class RagQueryRequest(BaseModel):
     query: str
     limit: int = 5
 
-from apps.api.infrastructure.rag.chat import ChatService
+from apps.api.ai_infrastructure.rag.chat import ChatService
 
 class RagQueryResponse(BaseModel):
     items: List[Dict[str, Any]]

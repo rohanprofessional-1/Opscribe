@@ -88,54 +88,64 @@ class S3Exporter(BaseExporter):
         Export one or more DiscoveryResults to S3 for a given client_id.
 
         S3 key structure:
-            {client_id}/latest.json        — most recent combined export
-            {client_id}/history/{ts}.json   — timestamped archive
+            {client_id}/{source}_latest.json        — most recent export for a specific source
+            {client_id}/history/{source}_{ts}.json  — timestamped archive
 
-        Returns the S3 key of the exported file.
+        Returns comma-separated S3 keys of the exported files.
         """
         now = datetime.now(timezone.utc)
         timestamp = now.strftime("%Y%m%dT%H%M%SZ")
 
-        payload = {
-            "client_id": client_id,
-            "label": label or "combined_export",
-            "exported_at": now.isoformat(),
-            "sources": [self._result_to_dict(r) for r in results],
-            "summary": {
-                "total_nodes": sum(len(r.nodes) for r in results),
-                "total_edges": sum(len(r.edges) for r in results),
-                "sources": [r.source for r in results],
-            },
-        }
+        from collections import defaultdict
+        
+        # Group results by source (e.g. 'aws', 'github') to prevent isolated workflows from overwriting each other
+        grouped_results = defaultdict(list)
+        for r in results:
+            grouped_results[r.source].append(r)
+            
+        uploaded_keys = []
 
-        body = json.dumps(payload, indent=2, default=str)
+        for source, source_results in grouped_results.items():
+            payload = {
+                "client_id": client_id,
+                "label": label or f"{source}_export",
+                "exported_at": now.isoformat(),
+                "sources": [self._result_to_dict(r) for r in source_results],
+                "summary": {
+                    "total_nodes": sum(len(r.nodes) for r in source_results),
+                    "total_edges": sum(len(r.edges) for r in source_results),
+                    "sources": [source],
+                },
+            }
 
-        # Upload latest
-        latest_key = f"{client_id}/latest.json"
-        history_key = f"{client_id}/history/{timestamp}.json"
+            body = json.dumps(payload, indent=2, default=str)
 
-        try:
-            print(f"DEBUG: Attempting to upload to s3://{self.bucket}/{latest_key}...")
-            self.s3.put_object(
-                Bucket=self.bucket,
-                Key=latest_key,
-                Body=body.encode("utf-8"),
-                ContentType="application/json",
-            )
-            print(f"DEBUG: Successfully uploaded to s3://{self.bucket}/{latest_key}")
-            logger.info(f"Uploaded to s3://{self.bucket}/{latest_key}")
+            latest_key = f"{client_id}/{source}_latest.json"
+            history_key = f"{client_id}/history/{source}_{timestamp}.json"
 
-            # Also archive
-            self.s3.put_object(
-                Bucket=self.bucket,
-                Key=history_key,
-                Body=body.encode("utf-8"),
-                ContentType="application/json",
-            )
-            logger.info(f"Archived to s3://{self.bucket}/{history_key}")
+            try:
+                print(f"DEBUG: Attempting to upload {source} to s3://{self.bucket}/{latest_key}...")
+                self.s3.put_object(
+                    Bucket=self.bucket,
+                    Key=latest_key,
+                    Body=body.encode("utf-8"),
+                    ContentType="application/json",
+                )
+                logger.info(f"Uploaded to s3://{self.bucket}/{latest_key}")
 
-            return latest_key
+                # Also archive
+                self.s3.put_object(
+                    Bucket=self.bucket,
+                    Key=history_key,
+                    Body=body.encode("utf-8"),
+                    ContentType="application/json",
+                )
+                logger.info(f"Archived to s3://{self.bucket}/{history_key}")
+                
+                uploaded_keys.append(latest_key)
 
-        except ClientError as e:
-            logger.error(f"S3 upload failed for client {client_id}: {e}")
-            raise
+            except ClientError as e:
+                logger.error(f"S3 upload failed for {source} for client {client_id}: {e}")
+                raise
+                
+        return ",".join(uploaded_keys)

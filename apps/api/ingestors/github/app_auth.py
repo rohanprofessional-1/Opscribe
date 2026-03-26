@@ -1,36 +1,45 @@
-import os
 import time
 import jwt
 import httpx
 from typing import Optional
 
-# IMPORTANT: This module reads GitHub App credentials from the database (platform_config table)
-# rather than from environment variables. Credentials are configured via POST /admin/github-app.
-# On first boot, main.py runs bootstrap_github_app_from_env() to seed from env if the table is empty.
+# IMPORTANT: This module reads GitHub App credentials from the database (ClientIntegration table)
+# rather than a global config or environment variables. Each client provides their own app credentials.
 
-def get_app_jwt(session) -> str:
+def get_app_jwt(client_id: str, session) -> str:
     """
-    Generates a short-lived JWT signed with the GitHub App's Private Key.
-    Reads GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY from the platform_config DB table.
+    Generates a short-lived JWT signed with the client's custom GitHub App Private Key.
+    Reads 'github_app_id' and 'github_private_key' from their ClientIntegration record.
     """
-    from apps.api.models import PlatformConfig
-    from apps.api.utils.encryption import decrypt_value
+    from apps.api.models import ClientIntegration
+    from apps.api.utils.encryption import decrypt_dict
+    from apps.api.routers.integrations import SENSITIVE_KEYS
+    from sqlmodel import select
 
-    app_id_row = session.get(PlatformConfig, "github_app_id")
-    private_key_row = session.get(PlatformConfig, "github_app_private_key")
+    statement = select(ClientIntegration).where(
+        ClientIntegration.client_id == client_id,
+        ClientIntegration.provider == "github_app",
+        ClientIntegration.is_active == True
+    )
+    integration = session.exec(statement).first()
 
-    if not app_id_row or not private_key_row:
-        raise ValueError(
-            "GitHub App credentials not found in database. "
-            "Configure them via POST /admin/github-app or set GITHUB_APP_ID and "
-            "GITHUB_APP_PRIVATE_KEY in .env for bootstrap."
-        )
+    if not integration:
+        raise ValueError(f"GitHub App credentials not found for client {client_id}. Please configure them in the Provider Settings.")
 
-    app_id = app_id_row.value
-    private_key = decrypt_value(private_key_row.value)
+    creds = decrypt_dict(integration.credentials, SENSITIVE_KEYS)
+    app_id = creds.get("github_app_id")
+    private_key = creds.get("github_private_key")
+
+    if not app_id or not private_key:
+        raise ValueError(f"Incomplete GitHub App credentials for client {client_id}. Missing App ID or Private Key.")
+
     # Normalise any literal \n sequences (can appear when key is copy-pasted)
     private_key = private_key.replace("\\n", "\n")
 
+    # Ensure valid PEM headers/footers in case it was saved before strict validation
+    if private_key.startswith("----BEGIN") and not private_key.startswith("-----BEGIN"):
+        private_key = "-" + private_key
+        
     now = int(time.time())
     payload = {
         "iat": now - 60,        # 60 s in the past to avoid clock-drift rejection
@@ -40,12 +49,12 @@ def get_app_jwt(session) -> str:
     return jwt.encode(payload, private_key, algorithm="RS256")
 
 
-async def get_installation_token(installation_id: str, session) -> str:
+async def get_installation_token(installation_id: str, client_id: str, session) -> str:
     """
-    Exchanges the App JWT for a short-lived Installation Access Token scoped to
+    Exchanges the client's App JWT for a short-lived Installation Access Token scoped to
     the repositories authorised for this installation.
     """
-    app_jwt = get_app_jwt(session)
+    app_jwt = get_app_jwt(client_id, session)
 
     url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
     headers = {

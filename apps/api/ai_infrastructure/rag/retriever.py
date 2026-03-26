@@ -4,8 +4,8 @@ from sqlmodel import Session, select
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import text
 
-from apps.api.infrastructure.rag.models import KnowledgeBaseItem
-from apps.api.infrastructure.rag.embeddings import EmbeddingService
+from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
+from apps.api.ai_infrastructure.rag.embeddings import EmbeddingService
 
 class GraphRetriever:
     def __init__(self, session: Session):

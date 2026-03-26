@@ -77,12 +77,12 @@ async def trigger_export(
         )
     ).first()
 
-    # Keys to decrypt if present
-    sensitive_keys = ["aws_secret_access_key", "secret_key"]
+    # Import the source of truth for encrypted keys
+    from apps.api.routers.integrations import SENSITIVE_KEYS
 
     ingestors: List[BaseIngestor] = []
     if request.include_aws:
-        aws_creds = decrypt_dict(aws_integration.credentials, sensitive_keys) if aws_integration else {}
+        aws_creds = decrypt_dict(aws_integration.credentials, SENSITIVE_KEYS) if aws_integration else {}
         ingestors.append(AWSIngestor(region_name=request.aws_region, credentials=aws_creds))
     
     if request.include_github:

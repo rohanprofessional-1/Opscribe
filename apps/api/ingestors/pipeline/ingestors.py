@@ -64,7 +64,7 @@ class GitHubIngestor(BaseIngestor):
 
             try:
                 print(f"DEBUG: Fetching installation token for ID: {repo.installation_id}")
-                token = await get_installation_token(repo.installation_id, self.session)
+                token = await get_installation_token(repo.installation_id, str(self.client_id), self.session)
                 print("DEBUG: Token fetched successfully. Starting GitHubIngestionPipeline...")
                 pipeline = GitHubIngestionPipeline(
                     repo_url=repo.repo_url,

@@ -6,12 +6,12 @@ import os
 import shutil
 
 from apps.api.models import Node, Edge, ConnectedRepository, Client
-from apps.api.infrastructure.rag.models import KnowledgeBaseItem
+from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
 from apps.api.ingestors.github.client import GitHubClient
 from apps.api.ingestors.github.deterministic import IaCParser, DependencyParser
 from apps.api.ingestors.github.semantic import SemanticParser
 from apps.api.ingestors.github.app_auth import get_installation_token
-from apps.api.infrastructure.rag.embeddings import EmbeddingService
+from apps.api.ai_infrastructure.rag.embeddings import EmbeddingService
 from apps.api.ingestors.github.pipeline import COMPONENT_TO_NODE_TYPE
 from apps.api.models import Graph, NodeType, EdgeType
 import datetime

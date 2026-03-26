@@ -5,10 +5,12 @@
  * It also allows the user to open a design and delete a design.
  */
 
-import { useState } from "react";
-import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon, Database, Github } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
 import SettingsModal from "./SettingsModal";
+
+const API_BASE = "http://localhost:8000";
 
 export default function InfrastructureDashboard({
   designs,
@@ -20,6 +22,25 @@ export default function InfrastructureDashboard({
   onDeleteDesign,
 }: InfrastructureDashboardProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<"aws" | "repos" | undefined>(undefined);
+
+  const [hasIntegrations, setHasIntegrations] = useState<boolean | null>(null);
+
+  // Fetch integration status to determine if we should show the Onboarding Hero
+  useEffect(() => {
+    fetch(`${API_BASE}/clients/me`)
+      .then(r => r.json())
+      .then(d => {
+        Promise.all([
+          fetch(`${API_BASE}/integrations/?client_id=${d.id}`).then(r => r.json()),
+          fetch(`${API_BASE}/github/connected-repos?client_id=${d.id}`).then(r => r.json())
+        ]).then(([ints, repos]) => {
+          const awsCount = Array.isArray(ints) ? ints.length : 0;
+          const repoCount = Array.isArray(repos) ? repos.length : 0;
+          setHasIntegrations(awsCount > 0 || repoCount > 0);
+        }).catch(() => setHasIntegrations(true)); // Hide onboarding on error
+      }).catch(() => setHasIntegrations(true));
+  }, [isSettingsOpen]); // Re-check when Settings Modal closes
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -30,15 +51,60 @@ export default function InfrastructureDashboard({
     return d.toLocaleDateString();
   };
 
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const handleCopyId = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const openSettings = (tab?: "aws" | "repos") => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
   };
 
+  // The Onboarding Hero View for NET NEW clients
+  if (designs.length === 0 && hasIntegrations === false && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 p-8 flex items-center justify-center">
+        <div className="max-w-3xl w-full text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Welcome to Opscribe</h1>
+          <p className="text-lg text-gray-400 mb-12">
+            Let's build your infrastructure graph. Connect your cloud environment or codebase to get started.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button
+              onClick={() => openSettings("aws")}
+              className="flex flex-col items-center justify-center p-10 bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-2xl transition-all group"
+            >
+              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Database className="w-8 h-8 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Connect AWS</h3>
+              <p className="text-sm text-gray-500 text-center">
+                Discover your VPCs, EC2s, RDS instances, and their relationships automatically using cross-account roles.
+              </p>
+            </button>
+
+            <button
+              onClick={() => openSettings("repos")}
+              className="flex flex-col items-center justify-center p-10 bg-gray-900 border border-gray-800 hover:border-purple-500 rounded-2xl transition-all group"
+            >
+              <div className="w-16 h-16 bg-purple-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Github className="w-8 h-8 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Connect GitHub</h3>
+              <p className="text-sm text-gray-500 text-center">
+                Install our application to parse Dockerfiles, Kubernetes manifests, and IaC to map your services.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          initialTab={settingsTab}
+          onClose={() => setIsSettingsOpen(false)}
+        />
+      </div>
+    );
+  }
+
+  // Standard Dashboard View
   return (
     <div className="min-h-screen bg-gray-950 p-8 relative">
       <div className="max-w-6xl mx-auto">
@@ -52,7 +118,7 @@ export default function InfrastructureDashboard({
             </p>
           </div>
           <button
-            onClick={() => setIsSettingsOpen(true)}
+            onClick={() => openSettings()}
             className="flex items-center justify-center gap-2 p-2 px-3 border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium shadow-sm"
           >
             <SettingsIcon className="w-4 h-4" />
@@ -129,7 +195,7 @@ export default function InfrastructureDashboard({
             {designs.length === 0 && (
               <p className="text-center text-gray-500 mt-12">
                 No designs yet. Click the card above to create your first
-                infrastructure.
+                infrastructure. (Or wait for Auto-Discovery to finish!)
               </p>
             )}
           </>
@@ -138,6 +204,7 @@ export default function InfrastructureDashboard({
 
       <SettingsModal
         isOpen={isSettingsOpen}
+        initialTab={settingsTab}
         onClose={() => setIsSettingsOpen(false)}
       />
     </div>
