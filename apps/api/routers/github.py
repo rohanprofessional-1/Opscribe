@@ -7,52 +7,69 @@ import json
 from uuid import UUID
 
 from apps.api.database import get_session
-from apps.api.models import Client, ConnectedRepository
+from apps.api.models import Client, ConnectedRepository, PlatformConfig
 from apps.api.ingestors.github.app_auth import get_installation_token
 from apps.api.ingestors.github.client import GitHubClient
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
 from apps.api.ingestors.pipeline.ingestors import GitHubIngestor
 from apps.api.routers.pipeline import run_export
-from fastapi.responses import RedirectResponse
-from sqlmodel import Session, select
-
+from apps.api.routers.clients import DEV_USER_ID
 
 router = APIRouter(
     prefix="/github",
     tags=["github"]
 )
 
-GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "mock_client_id")
-GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "mock_client_secret")
-GITHUB_REDIRECT_URI = os.environ.get("GITHUB_REDIRECT_URI", "http://localhost:8000/github/callback")
-WEBHOOK_SECRET = os.environ.get("GITHUB_WEBHOOK_SECRET", "mock_webhook_secret")
+@router.get("/config")
+def github_config(client_id: UUID, session: Session = Depends(get_session)):
+    """Returns the custom GitHub App configuration needed by the frontend for this specific client."""
+    from apps.api.models import ClientIntegration
+    from apps.api.utils.encryption import decrypt_dict
+    from apps.api.routers.integrations import SENSITIVE_KEYS
 
-@router.get("/login")
-def github_login(client_id: UUID = Query(..., description="The opscribe Client/Tenant ID")):
-    """Redirects the user to the GitHub OAuth authorization page."""
-    state = str(client_id)
-    url = (
-        f"https://github.com/login/oauth/authorize"
-        f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri={GITHUB_REDIRECT_URI}"
-        f"&scope=repo,metadata:read"
-        f"&state={state}"
+    statement = select(ClientIntegration).where(
+        ClientIntegration.client_id == client_id,
+        ClientIntegration.provider == "github_app",
+        ClientIntegration.is_active == True
     )
-    return RedirectResponse(url)
+    integration = session.exec(statement).first()
+    
+    if not integration:
+        return {"configured": False, "app_install_url": None}
+
+    creds = decrypt_dict(integration.credentials, SENSITIVE_KEYS)
+    slug = creds.get("github_app_slug") 
+    
+    if not slug:
+        return {"configured": False, "app_install_url": None}
+        
+    return {
+        "configured": True,
+        "app_install_url": f"https://github.com/apps/{slug}/installations/new",
+    }
 
 @router.get("/app/callback")
-async def github_app_callback(installation_id: str, setup_action: str = None, state: str = None, session: Session = Depends(get_session)):
+async def github_app_callback(
+    installation_id: str, 
+    setup_action: str = None, 
+    state: str = None, 
+    client_id: str = None,
+    session: Session = Depends(get_session)
+):
     """
     Handles the redirect after a user installs the GitHub App on their organization/account.
-    The 'state' parameter should contain the Opscribe client_id.
+    The 'state' or 'client_id' parameter should contain the Opscribe client_id.
+    Falls back to the DEV_USER_ID if no state is provided (dev mode).
     """
-    if not state:
-        raise HTTPException(status_code=400, detail="Missing state parameter (client_id)")
-        
-    try:
-        client_uuid = UUID(state)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid state parameter format")
+    effective_client_id = state or client_id
+    if effective_client_id:
+        try:
+            client_uuid = UUID(effective_client_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid client ID parameter format")
+    else:
+        # Dev mode: use the default dev client
+        client_uuid = DEV_USER_ID
 
     db_client = session.get(Client, client_uuid)
     if not db_client:
@@ -74,19 +91,37 @@ async def get_repositories(client_id: UUID, session: Session = Depends(get_sessi
         raise HTTPException(status_code=401, detail="GitHub App not installed for this client")
 
     installation_id = db_client.metadata_["github_installation_id"]
-    
+    print(f"DEBUG: Fetching repos for client {client_id} with installation {installation_id}")
+
     try:
-        # Get a fresh 1-hour token for this specific installation
-        token = await get_installation_token(installation_id)
+        # Session passed through so app_auth reads credentials from DB
+        token = await get_installation_token(installation_id, str(client_id), session)
+        print(f"DEBUG: Generated installation token: {token[:5]}...")
         gh_client = GitHubClient(access_token=token)
+
+        all_repos = []
+        page = 1
         
-        # GitHub App endpoint for repos is different from user OAuth endpoint
-        response = await gh_client._request_with_retry("GET", "/installation/repositories")
-        repos = response.json().get("repositories", [])
-        
+        while True:
+            response = await gh_client._request_with_retry("GET", f"/installation/repositories?per_page=100&page={page}")
+            data = response.json()
+            page_repos = data.get("repositories", [])
+            
+            if not page_repos:
+                break
+                
+            all_repos.extend(page_repos)
+            
+            if len(page_repos) < 100:
+                break
+                
+            page += 1
+            
+        print(f"DEBUG: Found {len(all_repos)} repositories total across {page} pages.")
+
         return [
             {"id": str(r["id"]), "name": r["full_name"], "default_branch": r["default_branch"]}
-            for r in repos
+            for r in all_repos
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch repositories: {str(e)}")
@@ -108,20 +143,19 @@ class ConnectRepoRequest(BaseModel):
 
 @router.post("/connect")
 async def connect_repository(
-    request: ConnectRepoRequest, 
+    request: ConnectRepoRequest,
     background_tasks: BackgroundTasks,
     session: Session = Depends(get_session)
 ):
     """
     Saves the selected repository to the database and schedules an initial baseline ingestion.
-    (Note: Webhooks are handled centrally by the GitHub App, no need to register them here anymore).
     """
     db_client = session.get(Client, request.client_id)
     if not db_client or not db_client.metadata_ or "github_installation_id" not in db_client.metadata_:
         raise HTTPException(status_code=401, detail="GitHub App not installed")
 
     installation_id = db_client.metadata_["github_installation_id"]
-    
+
     repo = ConnectedRepository(
         client_id=request.client_id,
         repo_url=request.repo_url,
@@ -134,7 +168,6 @@ async def connect_repository(
     session.commit()
     session.refresh(repo)
 
-    # Trigger initial baseline ingestion asynchronously
     ingestor = GitHubIngestor(client_id=str(request.client_id), session=session, repo_url=request.repo_url)
     exporter = S3Exporter()
     background_tasks.add_task(
@@ -143,14 +176,51 @@ async def connect_repository(
         ingestors=[ingestor],
         exporter=exporter
     )
-    
+
     return {"status": "success", "repository_id": repo.id}
 
 
 @router.post("/webhook")
-async def github_webhook(request: Request, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
-    """Receives GitHub App events to trigger re-ingestion."""
+async def github_webhook(
+    request: Request, 
+    background_tasks: BackgroundTasks, 
+    session: Session = Depends(get_session),
+    client_id: str = Query(...)
+):
+    """Receives GitHub App events to trigger re-ingestion for the querying client."""
+    from apps.api.models import ClientIntegration
+    from apps.api.utils.encryption import decrypt_dict
+    from apps.api.routers.integrations import SENSITIVE_KEYS
+    import hmac
+    import hashlib
+
+    # 1. (Optional) Signature Verification — if client has a Webhook Secret configured
+    statement = select(ClientIntegration).where(
+        ClientIntegration.client_id == client_id,
+        ClientIntegration.provider == "github_app"
+    )
+    integration = session.exec(statement).first()
     
+    if integration:
+        creds = decrypt_dict(integration.credentials, SENSITIVE_KEYS)
+        secret = creds.get("github_webhook_secret")
+        
+        if secret:
+            signature = request.headers.get("X-Hub-Signature-256")
+            if not signature:
+                raise HTTPException(status_code=401, detail="Webhook signature missing")
+            
+            body = await request.body()
+            expected_signature = "sha256=" + hmac.new(
+                secret.encode("utf-8"),
+                msg=body,
+                digestmod=hashlib.sha256
+            ).hexdigest()
+            
+            if not hmac.compare_digest(signature, expected_signature):
+                raise HTTPException(status_code=401, detail="Webhook signature invalid")
+
+    # 2. Process Payload
     event = request.headers.get("X-GitHub-Event")
     if event != "push":
         return {"status": "ignored", "reason": "not a push event"}
@@ -158,16 +228,16 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks, se
     payload = await request.json()
     repo_url = payload.get("repository", {}).get("html_url")
     ref = payload.get("ref", "")
-    
-    # Check if this app installation matches our records
+
     installation_id = str(payload.get("installation", {}).get("id", ""))
-    
+
     if not repo_url or not installation_id:
         return {"status": "ignored", "reason": "missing repo or installation id"}
 
     stmt = select(ConnectedRepository).where(
         ConnectedRepository.repo_url == repo_url,
-        ConnectedRepository.installation_id == installation_id
+        ConnectedRepository.installation_id == installation_id,
+        ConnectedRepository.client_id == client_id
     )
     connected_repos = session.exec(stmt).all()
 
@@ -175,7 +245,7 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks, se
         if ref == f"refs/heads/{connected.default_branch}":
             connected.ingestion_status = "pending"
             session.add(connected)
-            
+
             print(f"Scheduling background App ingestion for {connected.repo_url}")
             ingestor = GitHubIngestor(client_id=str(connected.client_id), session=session, repo_url=connected.repo_url)
             exporter = S3Exporter()
@@ -188,3 +258,5 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks, se
 
     session.commit()
     return {"status": "success", "message": "App Webhook processed"}
+
+

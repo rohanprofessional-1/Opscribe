@@ -2,8 +2,8 @@ from uuid import UUID
 from datetime import datetime
 from sqlmodel import Session, select
 from apps.api.models import Graph, Node, Edge
-from apps.api.infrastructure.rag.models import KnowledgeBaseItem
-from apps.api.infrastructure.rag.embeddings import EmbeddingService
+from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
+from apps.api.ai_infrastructure.rag.embeddings import EmbeddingService
 
 class GraphIngestor:
     def __init__(self, session: Session):

@@ -7,14 +7,18 @@ from alembic import context
 
 import os
 from dotenv import dotenv_values
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, text
 
 # Import models to ensure they are registered in the metadata
 from apps.api import models
+from apps.api.ai_infrastructure.rag import models as rag_models
 
 # Load environment variables
-envvars = dotenv_values(".env")
-database_url = envvars.get("DATABASE_URL") or os.environ.get("DATABASE_URL", "postgresql://user:password@localhost:5432/opscribe")
+# Use the directory of this file to find the .env in apps/api/
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+envvars = dotenv_values(os.path.join(api_dir, ".env"))
+database_url = envvars.get("DATABASE_URL") or os.environ.get("DATABASE_URL", "postgresql://user:password@127.0.0.1:5433/opscribe")
+print(f"DEBUG: Alembic using database_url={database_url}")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -74,12 +78,15 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Ensure public is in search path so vector type is found
+        connection.execute(text('SET search_path TO public, "$user"'))
+        
         context.configure(
             connection=connection, target_metadata=target_metadata
         )
 
-        with context.begin_transaction():
-            context.run_migrations()
+        context.run_migrations()
+        connection.commit()
 
 
 if context.is_offline_mode():

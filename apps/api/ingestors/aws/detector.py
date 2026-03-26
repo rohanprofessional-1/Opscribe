@@ -49,16 +49,20 @@ class AWSDetector(BaseDetector):
         role_arn = self.credentials.get("role_arn")
         if role_arn:
             if not self._temp_credentials:
-                # Use Opscribe's global AWS credentials ONLY to broker the STS AssumeRole call
-                sts_access = env.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
-                sts_secret = env.get("AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+                # Use Opscribe's global AWS credentials ONLY to broker the STS AssumeRole call.
+                # We prioritize OPSCRIBE_AWS_ prefixed keys if set in .env to avoid collision with mocks.
+                sts_access = env.get("OPSCRIBE_AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
+                sts_secret = env.get("OPSCRIBE_AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
                 
-                sts = boto3.client(
-                    "sts", 
-                    region_name=self.region_name,
-                    aws_access_key_id=sts_access,
-                    aws_secret_access_key=sts_secret
-                )
+                sts_kwargs = {
+                    "service_name": "sts",
+                    "region_name": self.region_name
+                }
+                if sts_access:
+                    sts_kwargs["aws_access_key_id"] = sts_access
+                    sts_kwargs["aws_secret_access_key"] = sts_secret
+                    
+                sts = boto3.client(**sts_kwargs)
                 
                 assume_role_kwargs = {
                     "RoleArn": role_arn,

@@ -8,8 +8,8 @@ from sqlmodel import Session
 from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-from apps.api.infrastructure.rag.models import KnowledgeBaseItem
-from apps.api.infrastructure.rag.embeddings import EmbeddingService
+from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
+from apps.api.ai_infrastructure.rag.embeddings import EmbeddingService
 
 logger = logging.getLogger(__name__)
 

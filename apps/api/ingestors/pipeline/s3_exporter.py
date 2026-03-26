@@ -32,14 +32,8 @@ class S3Exporter(BaseExporter):
         
         endpoint_url = env.get("AWS_S3_ENDPOINT_URL") or os.environ.get("AWS_S3_ENDPOINT_URL")
         region = env.get("AWS_REGION") or os.environ.get("AWS_REGION", "us-east-1")
-        
-        # If talking to local MinIO, prefer MinIO credentials over AWS production IAM keys
-        if endpoint_url and "localhost" in endpoint_url:
-            access_key = env.get("OPSCRIBE_MINIO_USER") or os.environ.get("OPSCRIBE_MINIO_USER", "minioadmin")
-            secret_key = env.get("OPSCRIBE_MINIO_PASSWORD") or os.environ.get("OPSCRIBE_MINIO_PASSWORD", "minioadmin")
-        else:
-            access_key = env.get("OPSCRIBE_AWS_ACCESS_KEY_ID") or os.environ.get("OPSCRIBE_AWS_ACCESS_KEY_ID")
-            secret_key = env.get("OPSCRIBE_AWS_SECRET_ACCESS_KEY") or os.environ.get("OPSCRIBE_AWS_SECRET_ACCESS_KEY")
+        access_key = env.get("OPSCRIBE_MINIO_USER") or os.environ.get("AWS_ACCESS_KEY_ID")
+        secret_key = env.get("OPSCRIBE_MINIO_PASSWORD") or os.environ.get("AWS_SECRET_ACCESS_KEY")
         
         client_kwargs = {
             "service_name": "s3",
@@ -53,24 +47,6 @@ class S3Exporter(BaseExporter):
         self.s3 = boto3.client(**client_kwargs)
         self.bucket = env.get("OPSCRIBE_S3_BUCKET") or os.environ.get("OPSCRIBE_S3_BUCKET", "opscribe-data")
         print(f"DEBUG: S3Exporter initialized with bucket: {self.bucket}, endpoint: {endpoint_url}")
-        self._ensure_bucket()
-
-    def _ensure_bucket(self):
-        """Create the S3/MinIO bucket if it doesn't already exist."""
-        try:
-            self.s3.head_bucket(Bucket=self.bucket)
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code in ("404", "NoSuchBucket"):
-                logger.info(f"Bucket '{self.bucket}' not found, creating it...")
-                try:
-                    self.s3.create_bucket(Bucket=self.bucket)
-                    logger.info(f"Bucket '{self.bucket}' created successfully.")
-                except ClientError as create_err:
-                    logger.error(f"Failed to create bucket '{self.bucket}': {create_err}")
-                    raise
-            else:
-                logger.warning(f"Could not verify bucket '{self.bucket}': {e}")
 
     @property
     def backend_name(self) -> str:
@@ -112,54 +88,64 @@ class S3Exporter(BaseExporter):
         Export one or more DiscoveryResults to S3 for a given client_id.
 
         S3 key structure:
-            {client_id}/latest.json        — most recent combined export
-            {client_id}/history/{ts}.json   — timestamped archive
+            {client_id}/{source}_latest.json        — most recent export for a specific source
+            {client_id}/history/{source}_{ts}.json  — timestamped archive
 
-        Returns the S3 key of the exported file.
+        Returns comma-separated S3 keys of the exported files.
         """
         now = datetime.now(timezone.utc)
         timestamp = now.strftime("%Y%m%dT%H%M%SZ")
 
-        payload = {
-            "client_id": client_id,
-            "label": label or "combined_export",
-            "exported_at": now.isoformat(),
-            "sources": [self._result_to_dict(r) for r in results],
-            "summary": {
-                "total_nodes": sum(len(r.nodes) for r in results),
-                "total_edges": sum(len(r.edges) for r in results),
-                "sources": [r.source for r in results],
-            },
-        }
+        from collections import defaultdict
+        
+        # Group results by source (e.g. 'aws', 'github') to prevent isolated workflows from overwriting each other
+        grouped_results = defaultdict(list)
+        for r in results:
+            grouped_results[r.source].append(r)
+            
+        uploaded_keys = []
 
-        body = json.dumps(payload, indent=2, default=str)
+        for source, source_results in grouped_results.items():
+            payload = {
+                "client_id": client_id,
+                "label": label or f"{source}_export",
+                "exported_at": now.isoformat(),
+                "sources": [self._result_to_dict(r) for r in source_results],
+                "summary": {
+                    "total_nodes": sum(len(r.nodes) for r in source_results),
+                    "total_edges": sum(len(r.edges) for r in source_results),
+                    "sources": [source],
+                },
+            }
 
-        # Upload latest
-        latest_key = f"{client_id}/latest.json"
-        history_key = f"{client_id}/history/{timestamp}.json"
+            body = json.dumps(payload, indent=2, default=str)
 
-        try:
-            print(f"DEBUG: Attempting to upload to s3://{self.bucket}/{latest_key}...")
-            self.s3.put_object(
-                Bucket=self.bucket,
-                Key=latest_key,
-                Body=body.encode("utf-8"),
-                ContentType="application/json",
-            )
-            print(f"DEBUG: Successfully uploaded to s3://{self.bucket}/{latest_key}")
-            logger.info(f"Uploaded to s3://{self.bucket}/{latest_key}")
+            latest_key = f"{client_id}/{source}_latest.json"
+            history_key = f"{client_id}/history/{source}_{timestamp}.json"
 
-            # Also archive
-            self.s3.put_object(
-                Bucket=self.bucket,
-                Key=history_key,
-                Body=body.encode("utf-8"),
-                ContentType="application/json",
-            )
-            logger.info(f"Archived to s3://{self.bucket}/{history_key}")
+            try:
+                print(f"DEBUG: Attempting to upload {source} to s3://{self.bucket}/{latest_key}...")
+                self.s3.put_object(
+                    Bucket=self.bucket,
+                    Key=latest_key,
+                    Body=body.encode("utf-8"),
+                    ContentType="application/json",
+                )
+                logger.info(f"Uploaded to s3://{self.bucket}/{latest_key}")
 
-            return latest_key
+                # Also archive
+                self.s3.put_object(
+                    Bucket=self.bucket,
+                    Key=history_key,
+                    Body=body.encode("utf-8"),
+                    ContentType="application/json",
+                )
+                logger.info(f"Archived to s3://{self.bucket}/{history_key}")
+                
+                uploaded_keys.append(latest_key)
 
-        except ClientError as e:
-            logger.error(f"S3 upload failed for client {client_id}: {e}")
-            raise
+            except ClientError as e:
+                logger.error(f"S3 upload failed for {source} for client {client_id}: {e}")
+                raise
+                
+        return ",".join(uploaded_keys)

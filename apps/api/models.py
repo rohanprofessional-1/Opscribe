@@ -9,6 +9,19 @@ from sqlalchemy.dialects.postgresql import JSONB
 def utc_now():
     return datetime.utcnow()
 
+
+class PlatformConfig(SQLModel, table=True):
+    """
+    A single-row-per-key store for platform-wide server configuration.
+    Sensitive values (e.g. private keys) are encrypted using the OPSCRIBE_MASTER_KEY
+    before being saved here via the admin endpoints.
+    """
+    __tablename__ = "platform_config"
+    key: str = Field(primary_key=True)   # e.g. "github_app_id"
+    value: str = Field()                  # encrypted for sensitive entries
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
+
 class Client(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True)
