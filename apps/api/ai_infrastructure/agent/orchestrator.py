@@ -8,10 +8,10 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from sqlmodel import Session
 
 # Import tools (these will be built out individually)
-from apps.api.infrastructure.agent.tools.rag import get_rag_search_tool
-from apps.api.infrastructure.agent.tools.terraform import get_terraform_generator_tool
-from apps.api.infrastructure.agent.tools.github import get_github_actions_tool
-from apps.api.infrastructure.agent.tools.compliance import get_iam_compliance_tool
+from apps.api.ai_infrastructure.agent.tools.rag import get_rag_search_tool
+from apps.api.ai_infrastructure.agent.tools.terraform import get_terraform_generator_tool
+from apps.api.ai_infrastructure.agent.tools.github import get_github_actions_tool
+from apps.api.ai_infrastructure.agent.tools.compliance import get_iam_compliance_tool
 
 class AgentOrchestrator:
     """

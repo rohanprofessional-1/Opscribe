@@ -106,17 +106,16 @@ export default function InfrastructureDashboard({
 
   // Standard Dashboard View
   return (
-    <div className="min-h-screen bg-gray-950 p-8 relative">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-10 flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              Infrastructure Designs
-            </h1>
-            <p className="text-gray-400 mt-1">
-              View and manage your infrastructure diagrams
-            </p>
+    <div className="min-h-screen bg-[#020617] relative">
+      <nav className="fixed top-0 left-0 w-full z-10 bg-[#01040a]/80 backdrop-blur-md border-b border-white/5 px-8 py-4 flex justify-between items-center shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-white/10 bg-white/5">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
+          <span className="text-xl font-black tracking-tighter uppercase text-white">Opscribe</span>
+        </div>
+        
+        <div className="flex items-center gap-4">
           <button
             onClick={() => openSettings()}
             className="flex items-center justify-center gap-2 p-2 px-3 border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium shadow-sm"
@@ -124,6 +123,22 @@ export default function InfrastructureDashboard({
             <SettingsIcon className="w-4 h-4" />
             Provider Settings
           </button>
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-blue-500/20">
+            HK
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto pt-32 pb-20 px-4">
+        <header className="mb-10 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight uppercase">
+              Infrastructure Designs
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium">
+              View and manage your architectural knowledge maps.
+            </p>
+          </div>
         </header>
 
         {error && (

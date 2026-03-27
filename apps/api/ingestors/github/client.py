@@ -66,7 +66,7 @@ class GitHubClient:
         payload = {
             "name": "web",
             "active": True,
-            "events": ["push"],
+            "events": ["push", "pull_request"],
             "config": {
                 "url": webhook_url,
                 "content_type": "json",
@@ -76,3 +76,23 @@ class GitHubClient:
         }
         response = await self._request_with_retry("POST", f"/repos/{owner}/{repo}/hooks", json=payload)
         return response.json()
+
+    async def get_pull_request_files(self, owner: str, repo: str, pull_number: int) -> list[Dict[str, Any]]:
+        """Fetch files changed in a given pull request."""
+        # Using pagination up to 100 for simplicity
+        response = await self._request_with_retry("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}/files?per_page=100")
+        return response.json()
+
+    async def get_file_content(self, owner: str, repo: str, filename: str, ref: str) -> Optional[str]:
+        """Fetch raw file content from the repository."""
+        headers = self.headers.copy()
+        headers["Accept"] = "application/vnd.github.v3.raw"
+        url = f"{self.BASE_URL}/repos/{owner}/{repo}/contents/{filename}?ref={ref}"
+        
+        async with httpx.AsyncClient(headers=headers, timeout=10.0) as client:
+            response = await client.request("GET", url)
+            if response.status_code == 404:
+                return None
+            response.raise_for_status()
+            return response.text
+

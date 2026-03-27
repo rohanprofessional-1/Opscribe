@@ -54,7 +54,7 @@ def get_integrations(
     return results
 
 @router.post("/{provider}")
-def save_integration(
+async def save_integration(
     provider: str,
     config: IntegrationConfig,
     client_id: str,
