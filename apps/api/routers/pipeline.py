@@ -16,6 +16,7 @@ import logging
 from apps.api.ingestors.pipeline.ingestors import AWSIngestor, GitHubIngestor, GitHubLinkIngestor
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
 from apps.api.ingestors.pipeline.base import BaseIngestor, BaseExporter
+from apps.api.infrastructure.ingestor import ingest_to_graph
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,11 @@ async def run_export(
         
         if results:
             await exporter.export(client_id=client_id, results=results, label="export")
+            
+            # Post-export: Ingest to graph for visualization
+            from apps.api.database import engine
+            with Session(engine) as session:
+                await ingest_to_graph(client_id=client_id, results=results, session=session)
     except Exception as e:
         logger.error(f"Pipeline export failed: {e}")
 
@@ -114,6 +120,11 @@ async def run_github_link(
         label = f"github_link_export_{repo_url.split('/')[-1] if '/' in repo_url else 'repo'}"
         if results:
             await exporter.export(client_id=client_id, results=results, label=label)
+            
+            # Post-export: Ingest to graph for visualization
+            from apps.api.database import engine
+            with Session(engine) as session:
+                await ingest_to_graph(client_id=client_id, results=results, session=session)
     except Exception as e:
         logger.error(f"GitHub link ingestion failed for {repo_url}: {e}")
 

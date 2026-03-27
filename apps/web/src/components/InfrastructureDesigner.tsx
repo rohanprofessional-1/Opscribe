@@ -21,6 +21,7 @@ import ReactFlow, {
 import type { Node, Edge, Connection, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 import { ArrowLeft, Bot } from "lucide-react";
+import dagre from "dagre";
 
 import NodePalette from "./NodePalette";
 import GithubConnectPanel from "./GithubConnectPanel";
@@ -32,7 +33,7 @@ import type {
   InfrastructureNodeData,
   InfrastructureDesign,
 } from "../types/infrastructure";
-import { getCategoryColor } from "../data/nodeTemplates";
+import { getCategoryColor, nodeTemplates } from "../data/nodeTemplates";
 import { api } from "../api/client";
 
 const nodeTypes = {
@@ -62,6 +63,50 @@ interface InfrastructureDesignerProps {
     name: string,
   ) => void;
 }
+
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const nodeWidth = 240;
+const nodeHeight = 120;
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    if (!node.parentNode) {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    }
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  return nodes.map((node) => {
+    if (!node.parentNode) {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      if (nodeWithPosition) {
+        node.position = {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        };
+      }
+    } else {
+      if (node.position.x === 0 && node.position.y === 0) {
+        const siblings = nodes.filter(n => n.parentNode === node.parentNode);
+        const index = siblings.indexOf(node);
+        node.position = {
+          x: 40 + (index % 3) * 280,
+          y: 80 + Math.floor(index / 3) * 150,
+        };
+      }
+    }
+    return node;
+  });
+};
 
 export default function InfrastructureDesigner({
   design,
@@ -109,34 +154,45 @@ export default function InfrastructureDesigner({
         apiNodes.forEach((n) => {
           idToKey[n.id] = n.key;
         });
-        const pos = (p: unknown) => {
-          if (p && typeof p === "object" && "x" in p && "y" in p)
-            return { x: Number((p as { x: unknown }).x), y: Number((p as { y: unknown }).y) };
-          return { x: 0, y: 0 };
-        };
-        const rfNodes = apiNodes.map((n) => ({
-          id: n.key,
-          type: "infrastructureNode" as const,
-          position: pos(n.properties?.position),
-          data: {
-            label: n.display_name ?? n.key,
-            ...n.properties,
-          } as InfrastructureNodeData,
-        }));
-        const rfEdges = apiEdges
-          .map((e) => {
-            const source = idToKey[e.from_node_id];
-            const target = idToKey[e.to_node_id];
-            if (!source || !target) return null;
-            return {
+
+        const rfNodes: Node[] = apiNodes.map((n) => {
+          const templateId = n.properties?.template_id;
+          const template = templateId 
+            ? nodeTemplates.find(t => t.id === templateId)
+            : null;
+
+          return {
+            id: n.key,
+            type: "infrastructureNode",
+            position: { x: 0, y: 0 }, // Will be set by layout
+            parentNode: n.properties?.parent_id as string | undefined,
+            extent: n.properties?.parent_id ? "parent" : undefined,
+            data: {
+              label: n.display_name ?? n.key,
+              category: template?.category ?? n.properties?.category ?? "compute",
+              icon: template?.icon ?? n.properties?.icon ?? "Activity",
+              ...template?.defaultData,
+              ...n.properties,
+            } as InfrastructureNodeData,
+          } as Node;
+        });
+
+        const rfEdges: Edge[] = [];
+        apiEdges.forEach((e) => {
+          const source = idToKey[e.from_node_id];
+          const target = idToKey[e.to_node_id];
+          if (source && target) {
+            rfEdges.push({
               id: e.id,
               source,
               target,
               ...defaultEdgeOptions,
-            };
-          })
-          .filter((e): e is NonNullable<typeof e> => e != null);
-        setNodes(rfNodes);
+            });
+          }
+        });
+
+        const layoutedNodes = getLayoutedElements(rfNodes, rfEdges);
+        setNodes(layoutedNodes);
         setEdges(rfEdges);
       })
       .finally(() => setLoadingVisualization(false));

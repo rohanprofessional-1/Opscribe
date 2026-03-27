@@ -1,0 +1,339 @@
+{
+  "nodes": [
+    {
+      "id": "s3:opscribe-client-s3-bucket",
+      "template_id": "object-storage",
+      "display_name": "opscribe-client-s3-bucket",
+      "node_type": "storage",
+      "parent_id": "group:env:prod",
+      "environment": "prod",
+      "source": "aws",
+      "confidence": 1.0,
+      "source_completeness": "partial",
+      "source_metadata": [
+        {
+          "source": "aws",
+          "raw_key": "s3:opscribe-client-s3-bucket"
+        }
+      ],
+      "properties": {
+        "service": "S3",
+        "bucket_name": "opscribe-client-s3-bucket",
+        "creation_date": "2026-03-14T04:17:40+00:00",
+        "tags": {},
+        "location": "us-east-2"
+      },
+      "validation_warnings": [
+        {
+          "type": "partial_scan",
+          "message": "Potential partial scan",
+          "severity": "warn"
+        }
+      ]
+    },
+    {
+      "id": "vpc:vpc-02be6e22e7c7e29fa",
+      "template_id": "vpc-group",
+      "display_name": "vpc-02be6e22e7c7e29fa",
+      "node_type": "networking",
+      "parent_id": "group:env:prod",
+      "environment": "prod",
+      "source": "aws",
+      "confidence": 1.0,
+      "source_completeness": "partial",
+      "source_metadata": [
+        {
+          "source": "aws",
+          "raw_key": "vpc:vpc-02be6e22e7c7e29fa"
+        }
+      ],
+      "properties": {
+        "service": "VPC",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true,
+        "tags": {}
+      },
+      "validation_warnings": [
+        {
+          "type": "partial_scan",
+          "message": "Potential partial scan",
+          "severity": "warn"
+        },
+        {
+          "type": "empty_container",
+          "message": "Container has no child resources",
+          "severity": "warn"
+        }
+      ]
+    },
+    {
+      "id": "aws:iam:iam-group",
+      "template_id": "iam-group",
+      "display_name": "AWSServiceRoleForResourceExplorer",
+      "node_type": "security",
+      "parent_id": "group:env:prod",
+      "environment": "prod",
+      "source": "aws",
+      "confidence": 1.0,
+      "source_completeness": "partial",
+      "source_metadata": [
+        {
+          "source": "aws",
+          "raw_key": "iam:role:AWSServiceRoleForResourceExplorer"
+        },
+        {
+          "source": "aws",
+          "raw_key": "iam:role:AWSServiceRoleForSupport"
+        },
+        {
+          "source": "aws",
+          "raw_key": "iam:role:AWSServiceRoleForTrustedAdvisor"
+        }
+      ],
+      "properties": {
+        "service": "IAM",
+        "resource_type": "role",
+        "role_name": "AWSServiceRoleForResourceExplorer",
+        "created_date": "2026-03-04T02:49:37+00:00"
+      },
+      "validation_warnings": [
+        {
+          "type": "partial_scan",
+          "message": "Potential partial scan",
+          "severity": "warn"
+        }
+      ]
+    },
+    {
+      "id": "iam:role:OpscribeTestAccount",
+      "template_id": "iam-role",
+      "display_name": "OpscribeTestAccount",
+      "node_type": "security",
+      "parent_id": "group:env:prod",
+      "environment": "prod",
+      "source": "aws",
+      "confidence": 1.0,
+      "source_completeness": "partial",
+      "source_metadata": [
+        {
+          "source": "aws",
+          "raw_key": "iam:role:OpscribeTestAccount"
+        }
+      ],
+      "properties": {
+        "service": "IAM",
+        "resource_type": "role",
+        "role_name": "OpscribeTestAccount",
+        "created_date": "2026-03-25T03:11:55+00:00"
+      },
+      "validation_warnings": [
+        {
+          "type": "partial_scan",
+          "message": "Potential partial scan",
+          "severity": "warn"
+        }
+      ]
+    },
+    {
+      "id": "github:service:db",
+      "template_id": "vector-db",
+      "display_name": "db",
+      "node_type": "database",
+      "parent_id": "group:env:dev",
+      "environment": "dev",
+      "source": "github",
+      "confidence": 0.9,
+      "source_completeness": "full",
+      "source_metadata": [
+        {
+          "source": "github",
+          "raw_key": "github:service:db"
+        },
+        {
+          "source": "github",
+          "raw_key": "github:database:dep-pgvector"
+        }
+      ],
+      "properties": {
+        "service": "Service",
+        "source_location": "docker-compose.yml",
+        "confidence_score": 0.9,
+        "image": "ankane/pgvector:latest",
+        "ports": [
+          "5433:5432"
+        ],
+        "environment": {
+          "POSTGRES_USER": "user",
+          "POSTGRES_PASSWORD": "password",
+          "POSTGRES_DB": "opscribe"
+        },
+        "volumes": [
+          "postgres_data:/var/lib/postgresql/data"
+        ]
+      },
+      "validation_warnings": []
+    },
+    {
+      "id": "github:service:pgadmin",
+      "template_id": "db-admin",
+      "display_name": "pgadmin",
+      "node_type": "compute",
+      "parent_id": "group:env:dev",
+      "environment": "dev",
+      "source": "github",
+      "confidence": 0.9,
+      "source_completeness": "full",
+      "source_metadata": [
+        {
+          "source": "github",
+          "raw_key": "github:service:pgadmin"
+        }
+      ],
+      "properties": {
+        "service": "Service",
+        "source_location": "docker-compose.yml",
+        "confidence_score": 0.9,
+        "image": "dpage/pgadmin4",
+        "environment": {
+          "PGADMIN_DEFAULT_EMAIL": "admin@opscribe.com",
+          "PGADMIN_DEFAULT_PASSWORD": "admin"
+        },
+        "ports": [
+          "5050:80"
+        ],
+        "depends_on": [
+          "db"
+        ]
+      },
+      "validation_warnings": []
+    },
+    {
+      "id": "github:service:minio",
+      "template_id": "object-storage-local",
+      "display_name": "minio",
+      "node_type": "storage",
+      "parent_id": "group:env:dev",
+      "environment": "dev",
+      "source": "github",
+      "confidence": 0.9,
+      "source_completeness": "full",
+      "source_metadata": [
+        {
+          "source": "github",
+          "raw_key": "github:service:minio"
+        }
+      ],
+      "properties": {
+        "service": "Service",
+        "source_location": "docker-compose.yml",
+        "confidence_score": 0.9,
+        "image": "minio/minio:latest",
+        "ports": [
+          "9000:9000",
+          "9001:9001"
+        ],
+        "environment": {
+          "MINIO_ROOT_USER": "minioadmin",
+          "MINIO_ROOT_PASSWORD": "minioadmin"
+        },
+        "volumes": [
+          "minio_data:/data"
+        ],
+        "command": "server /data --console-address \":9001\""
+      },
+      "validation_warnings": []
+    },
+    {
+      "id": "github:service:apps",
+      "template_id": "api-service",
+      "display_name": "apps-service",
+      "node_type": "compute",
+      "parent_id": null,
+      "environment": "both",
+      "source": "inferred",
+      "confidence": 0.6,
+      "source_completeness": "inferred",
+      "source_metadata": [],
+      "properties": {},
+      "validation_warnings": [
+        {
+          "type": "inferred_node",
+          "message": "Inferred service from directory: apps",
+          "severity": "info"
+        }
+      ]
+    },
+    {
+      "id": "group:env:dev",
+      "template_id": "env-group",
+      "display_name": "dev-environment",
+      "node_type": "group",
+      "parent_id": null,
+      "environment": "dev",
+      "source": "inferred",
+      "confidence": 1.0,
+      "source_completeness": "full",
+      "source_metadata": [],
+      "properties": {},
+      "validation_warnings": []
+    },
+    {
+      "id": "group:env:prod",
+      "template_id": "env-group",
+      "display_name": "prod-environment",
+      "node_type": "group",
+      "parent_id": null,
+      "environment": "prod",
+      "source": "inferred",
+      "confidence": 1.0,
+      "source_completeness": "full",
+      "source_metadata": [],
+      "properties": {},
+      "validation_warnings": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "github-edge-0",
+      "from_node_id": "github:service:db",
+      "to_node_id": "github:service:db",
+      "edge_type": "depends_on",
+      "source": "github",
+      "confidence": 0.9,
+      "environment": "dev",
+      "properties": {}
+    },
+    {
+      "id": "github-edge-1",
+      "from_node_id": "github:service:pgadmin",
+      "to_node_id": "github:service:db",
+      "edge_type": "depends_on",
+      "source": "github",
+      "confidence": 0.9,
+      "environment": "dev",
+      "properties": {}
+    },
+    {
+      "id": "github-edge-2",
+      "from_node_id": "github:service:minio",
+      "to_node_id": "github:service:db",
+      "edge_type": "depends_on",
+      "source": "github",
+      "confidence": 0.9,
+      "environment": "dev",
+      "properties": {}
+    },
+    {
+      "id": "inferred-edge-3",
+      "from_node_id": "github:service:apps",
+      "to_node_id": "s3:opscribe-client-s3-bucket",
+      "edge_type": "accesses",
+      "source": "inferred",
+      "confidence": 0.8,
+      "environment": "both",
+      "properties": {}
+    }
+  ]
+}
