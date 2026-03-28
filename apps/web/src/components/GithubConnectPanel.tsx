@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Github, Link as LinkIcon, CheckCircle, AlertCircle } from "lucide-react";
+import { authFetch as fetch } from "../api/client";
 
 // For the MVP, we assume a single mock client or one retrieved from context
 const MOCK_CLIENT_ID = "123e4567-e89b-12d3-a456-426614174000";

@@ -101,7 +101,7 @@ def save_integration(
                 payload = {
                     "iat": now - 60,
                     "exp": now + (10 * 60),
-                    "iss": app_id
+                    "iss": str(app_id)
                 }
                 jwt_token = jwt.encode(payload, pem, algorithm="RS256")
             except Exception as e:

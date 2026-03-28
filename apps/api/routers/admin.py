@@ -10,7 +10,7 @@ from apps.api.models import Client, ConnectedRepository, PlatformConfig
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
 from apps.api.ingestors.pipeline.ingestors import GitHubIngestor
 from apps.api.routers.pipeline import run_export
-from apps.api.routers.clients import DEV_USER_ID
+from apps.api.utils.auth import get_current_client_id
 from apps.api.utils.encryption import encrypt_value, decrypt_value
 
 router = APIRouter(
@@ -112,21 +112,16 @@ class ScaffoldOrgRequest(BaseModel):
 async def scaffold_organization(
     request: ScaffoldOrgRequest,
     background_tasks: BackgroundTasks,
+    client_id: UUID = Depends(get_current_client_id),
     session: Session = Depends(get_session)
 ):
     """
-    Dev shortcut: saves a GitHub App installation ID directly into the dev client,
+    Dev shortcut: saves a GitHub App installation ID directly into the authenticated client,
     creates the repository record, and kicks off an immediate S3 ingestion.
     """
-    client = session.get(Client, DEV_USER_ID)
+    client = session.get(Client, client_id)
     if not client:
-        client = Client(
-            id=DEV_USER_ID,
-            name="Opscribe Org",
-            metadata_={"role": "admin", "temporary_auth": True},
-        )
-        session.add(client)
-        session.commit()
+        raise HTTPException(status_code=404, detail="Authenticated Client record missing")
 
     client.metadata_ = dict(client.metadata_ or {})
     client.metadata_["github_installation_id"] = request.installation_id
@@ -135,13 +130,13 @@ async def scaffold_organization(
 
     repo = session.exec(
         select(ConnectedRepository)
-        .where(ConnectedRepository.client_id == DEV_USER_ID)
+        .where(ConnectedRepository.client_id == client_id)
         .where(ConnectedRepository.repo_url == request.target_repo_url)
     ).first()
 
     if not repo:
         repo = ConnectedRepository(
-            client_id=DEV_USER_ID,
+            client_id=client_id,
             repo_url=request.target_repo_url,
             default_branch=request.default_branch,
             installation_id=request.installation_id,
@@ -152,19 +147,19 @@ async def scaffold_organization(
         session.commit()
         session.refresh(repo)
 
-    ingestor = GitHubIngestor(client_id=str(DEV_USER_ID), session=session, repo_url=request.target_repo_url)
+    ingestor = GitHubIngestor(client_id=str(client_id), session=session, repo_url=request.target_repo_url)
     exporter = S3Exporter()
     background_tasks.add_task(
         run_export,
-        client_id=str(DEV_USER_ID),
+        client_id=str(client_id),
         ingestors=[ingestor],
         exporter=exporter
     )
 
     return {
         "status": "success",
-        "message": "Organization scaffolded and ingestion pipeline started.",
-        "organization_id": DEV_USER_ID,
+        "message": "Organization scaffolded and ingestion pipeline started for the authenticated user.",
+        "organization_id": client_id,
         "repository_id": repo.id
     }
 

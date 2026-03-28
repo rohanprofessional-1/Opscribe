@@ -1,28 +1,44 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { setApiToken } from "./api/client";
 import InfrastructureDashboard from "./components/InfrastructureDashboard";
 import InfrastructureDesigner from "./components/InfrastructureDesigner";
 import LandingPage from "./components/landing/LandingPage";
-import LoginPage from "./components/LoginPage";
-import SignUpPage from "./components/SignUpPage";
 import { useInfrastructureDesigns } from "./hooks/useInfrastructureDesigns";
 import type { Node, Edge } from "reactflow";
 import type { InfrastructureNodeData } from "./types/infrastructure";
 import "./App.css";
 
-type View = "landing" | "login" | "signup" | "dashboard" | "designer";
+type View = "dashboard" | "designer";
 
 function App() {
+  const { isLoading, isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
+  const [tokenReady, setTokenReady] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getAccessTokenSilently()
+        .then(token => {
+          setApiToken(token);
+          setTokenReady(true);
+        })
+        .catch(err => console.error("Auth0 Token Error:", err));
+    } else if (!isLoading) {
+      setTokenReady(true);
+    }
+  }, [isAuthenticated, isLoading, getAccessTokenSilently]);
+
   const {
     designs,
-    loading,
+    loading: designsLoading,
     error,
     createDesignAsync,
     updateDesign,
     deleteDesign,
     getDesign,
-  } = useInfrastructureDesigns();
-  
-  const [view, setView] = useState<View>("landing");
+  } = useInfrastructureDesigns(tokenReady);
+
+  const [view, setView] = useState<View>("dashboard");
   const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
   const [createPending, setCreatePending] = useState(false);
 
@@ -58,6 +74,23 @@ function App() {
 
   const activeDesign = activeDesignId ? getDesign(activeDesignId) : null;
 
+  if (isLoading || !tokenReady) {
+    return (
+      <div className="min-h-screen bg-[#0A0D14] flex items-center justify-center text-gray-400 font-mono text-sm">
+        Authenticating...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <LandingPage
+        onLaunch={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}
+        onLogin={() => loginWithRedirect()}
+      />
+    );
+  }
+
   if (view === "designer" && activeDesignId) {
     return (
       <InfrastructureDesigner
@@ -67,39 +100,10 @@ function App() {
     );
   }
 
-  if (view === "landing") {
-    return (
-      <LandingPage 
-        onLaunch={() => setView("signup")} 
-        onLogin={() => setView("login")}
-      />
-    );
-  }
-
-  if (view === "login") {
-    return (
-      <LoginPage 
-        onLogin={() => setView("dashboard")} 
-        onBackToLanding={() => setView("landing")}
-        onGoToSignup={() => setView("signup")}
-      />
-    );
-  }
-
-  if (view === "signup") {
-    return (
-      <SignUpPage 
-        onSignUp={() => setView("dashboard")} 
-        onBackToLanding={() => setView("landing")}
-        onGoToLogin={() => setView("login")}
-      />
-    );
-  }
-
   return (
     <InfrastructureDashboard
       designs={designs}
-      loading={loading}
+      loading={designsLoading}
       error={error}
       createPending={createPending}
       onCreateNew={handleCreateNew}

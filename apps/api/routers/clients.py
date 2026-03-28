@@ -7,8 +7,9 @@ from apps.api.database import get_session
 from apps.api.models import Client, Graph
 from apps.api import schemas
 
-# Hardcoded dev user ID until Auth0 is fully integrated
-DEV_USER_ID = UUID("00000000-0000-0000-0000-000000000000")
+from apps.api.utils.auth import get_current_client_id
+
+# The hardcoded DEV_USER_ID has been removed. All users must authenticate via Auth0.
 
 router = APIRouter(
     prefix="/clients",
@@ -16,21 +17,17 @@ router = APIRouter(
 )
 
 @router.get("/me", response_model=schemas.ClientRead)
-def get_current_user(session: Session = Depends(get_session)):
+def get_current_user(
+    client_id: UUID = Depends(get_current_client_id), 
+    session: Session = Depends(get_session)
+):
     """
-    Temporary placeholder for a JWT-based /me endpoint. 
-    Returns a consistent 'Dev User' client until auth is fully implemented.
+    Returns the currently authenticated Opscribe Client.
+    Validates the Auth0 JWT and queries the database via the mapped ID.
     """
-    client = session.get(Client, DEV_USER_ID)
+    client = session.get(Client, client_id)
     if not client:
-        client = Client(
-            id=DEV_USER_ID,
-            name="Dev User",
-            metadata_={"role": "admin", "temporary_auth": True},
-        )
-        session.add(client)
-        session.commit()
-        session.refresh(client)
+        raise HTTPException(status_code=404, detail="Client not found in database")
     
     return client
 

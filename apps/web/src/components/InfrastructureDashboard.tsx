@@ -6,9 +6,11 @@
  */
 
 import { useState, useEffect } from "react";
-import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon, Database, Github } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon, Database, Github, LogOut } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
 import SettingsModal from "./SettingsModal";
+import { authFetch as fetch } from "../api/client";
 
 const API_BASE = "http://localhost:8000";
 
@@ -21,6 +23,7 @@ export default function InfrastructureDashboard({
   onOpenDesign,
   onDeleteDesign,
 }: InfrastructureDashboardProps) {
+  const { user, logout } = useAuth0();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<"aws" | "repos" | undefined>(undefined);
 
@@ -114,7 +117,7 @@ export default function InfrastructureDashboard({
           </div>
           <span className="text-xl font-black tracking-tighter uppercase text-white">Opscribe</span>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <button
             onClick={() => openSettings()}
@@ -123,8 +126,24 @@ export default function InfrastructureDashboard({
             <SettingsIcon className="w-4 h-4" />
             Provider Settings
           </button>
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-blue-500/20">
-            HK
+
+          <div className="h-6 w-px bg-gray-800 mx-1"></div>
+
+          <div className="flex items-center gap-3">
+            {user?.picture ? (
+              <img src={user.picture} alt={user?.name || "User"} className="w-8 h-8 rounded-full border border-gray-700 shadow-lg shadow-blue-500/20" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-blue-500/20">
+                {user?.name?.charAt(0)?.toUpperCase() || "U"}
+              </div>
+            )}
+            <button
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+              className="group flex items-center justify-center p-2 hover:bg-red-500/10 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+              title="Log Out"
+            >
+              <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </button>
           </div>
         </div>
       </nav>

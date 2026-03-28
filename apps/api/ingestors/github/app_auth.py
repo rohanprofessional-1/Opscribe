@@ -44,7 +44,7 @@ def get_app_jwt(client_id: str, session) -> str:
     payload = {
         "iat": now - 60,        # 60 s in the past to avoid clock-drift rejection
         "exp": now + (10 * 60), # 10-minute expiry
-        "iss": app_id,
+        "iss": str(app_id),
     }
     return jwt.encode(payload, private_key, algorithm="RS256")
 

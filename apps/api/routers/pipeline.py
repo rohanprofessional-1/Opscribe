@@ -16,6 +16,7 @@ import logging
 from apps.api.ingestors.pipeline.ingestors import AWSIngestor, GitHubIngestor, GitHubLinkIngestor
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
 from apps.api.ingestors.pipeline.base import BaseIngestor, BaseExporter
+from apps.api.infrastructure.intermediate import ingest_to_all_clients
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,11 @@ async def run_export(
         
         if results:
             await exporter.export(client_id=client_id, results=results, label="export")
+            
+            # Post-export: Ingest to graph for visualization
+            from apps.api.database import engine
+            with Session(engine) as session:
+                await ingest_to_all_clients(results=results, original_client_id=client_id, session=session)
     except Exception as e:
         logger.error(f"Pipeline export failed: {e}")
 
@@ -102,22 +108,6 @@ async def trigger_export(
         message=f"Export pipeline started for client {request.client_id}. Data will be exported to S3.",
     )
 
-
-async def run_github_link(
-    client_id: str,
-    ingestor: BaseIngestor,
-    exporter: BaseExporter,
-    repo_url: str,
-):
-    try:
-        results = await ingestor.ingest()
-        label = f"github_link_export_{repo_url.split('/')[-1] if '/' in repo_url else 'repo'}"
-        if results:
-            await exporter.export(client_id=client_id, results=results, label=label)
-    except Exception as e:
-        logger.error(f"GitHub link ingestion failed for {repo_url}: {e}")
-
-
 @router.post("/github-link", response_model=ExportResponse)
 async def trigger_github_link(
     request: GithubLinkRequest,
@@ -132,15 +122,29 @@ async def trigger_github_link(
         logger.warning(f"Public ingestion failed: Client ID {request.client_id} not found in database.")
         raise HTTPException(status_code=404, detail=f"Client {request.client_id} not found. Please ensure your tenant ID is correct.")
 
-    ingestor = GitHubLinkIngestor(repo_url=request.repo_url, branch=request.branch)
+    # Fetch active AWS integration to combine with GitHub Link results
+    aws_integration = session.exec(
+        select(ClientIntegration).where(
+            ClientIntegration.client_id == str(request.client_id),
+            ClientIntegration.provider == "aws",
+            ClientIntegration.is_active == True
+        )
+    ).first()
+
+    from apps.api.routers.integrations import SENSITIVE_KEYS
+    aws_creds = decrypt_dict(aws_integration.credentials, SENSITIVE_KEYS) if aws_integration else {}
+    
+    ingestors: List[BaseIngestor] = [
+        GitHubLinkIngestor(repo_url=request.repo_url, branch=request.branch),
+        AWSIngestor(region_name="us-east-1", credentials=aws_creds)
+    ]
     exporter = S3Exporter()
 
     background_tasks.add_task(
-        run_github_link,
-        client_id=request.client_id,
-        ingestor=ingestor,
+        run_export, # Use run_export instead of run_github_link to handle multiple ingestors
+        client_id=str(request.client_id),
+        ingestors=ingestors,
         exporter=exporter,
-        repo_url=request.repo_url,
     )
 
     return ExportResponse(

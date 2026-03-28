@@ -15,7 +15,6 @@ from apps.api.ingestors.pipeline.ingestors import GitHubIngestor
 from apps.api.ingestors.github.incremental import IncrementalUpdater
 from apps.api.routers.pipeline import run_export
 import logging
-from apps.api.routers.clients import DEV_USER_ID
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ def github_config(client_id: UUID, session: Session = Depends(get_session)):
         return {"configured": False, "app_install_url": None}
 
     creds = decrypt_dict(integration.credentials, SENSITIVE_KEYS)
-    slug = creds.get("github_app_slug") 
+    slug = (creds.get("github_app_slug") or "").strip()
     
     if not slug:
         return {"configured": False, "app_install_url": None}
@@ -62,8 +61,7 @@ async def github_app_callback(
 ):
     """
     Handles the redirect after a user installs the GitHub App on their organization/account.
-    The 'state' or 'client_id' parameter should contain the Opscribe client_id.
-    Falls back to the DEV_USER_ID if no state is provided (dev mode).
+    The 'state' or 'client_id' parameter MUST contain the Opscribe `client_id` to link the installation.
     """
     effective_client_id = state or client_id
     if effective_client_id:
@@ -72,8 +70,10 @@ async def github_app_callback(
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid client ID parameter format")
     else:
-        # Dev mode: use the default dev client
-        client_uuid = DEV_USER_ID
+        raise HTTPException(
+            status_code=400, 
+            detail="Missing client_id or state parameter. Opscribe GitHub App must be installed via the dashboard Setup URL."
+        )
 
     db_client = session.get(Client, client_uuid)
     if not db_client:
@@ -283,3 +283,48 @@ async def github_webhook(
 
     session.commit()
     return {"status": "success", "message": f"App Webhook processed for event: {event}"}
+
+
+@router.get("/datalake")
+async def get_datalake_preview(client_id: UUID):
+    """
+    Returns a preview of the MinIO data lake for a given client, including:
+    - The file tree of all stored objects
+    - The latest.json payload (if it exists)
+    """
+    try:
+        exporter = S3Exporter()
+        s3 = exporter.s3
+        bucket = exporter.bucket
+        prefix = f"{client_id}/"
+
+        response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        files = []
+        for obj in response.get("Contents", []):
+            key = obj["Key"]
+            files.append({
+                "key": key,
+                "size_bytes": obj["Size"],
+                "last_modified": obj["LastModified"].isoformat(),
+            })
+
+        # Try to read the latest.json
+        latest_payload = None
+        latest_key = f"{client_id}/github/latest.json"
+        try:
+            body = s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode()
+            latest_payload = json.loads(body)
+        except Exception:
+            pass  # No latest.json yet
+
+        return {
+            "bucket": bucket,
+            "client_id": str(client_id),
+            "file_count": len(files),
+            "files": files,
+            "latest_payload": latest_payload,
+        }
+    except Exception as e:
+        logger.error(f"Failed to read data lake for client {client_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to read data lake: {str(e)}")
+

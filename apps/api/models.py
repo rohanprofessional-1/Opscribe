@@ -10,6 +10,14 @@ def utc_now():
     return datetime.utcnow()
 
 
+class User(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    email: str = Field(index=True, unique=True)
+    full_name: Optional[str] = None
+    client_id: UUID = Field(foreign_key="client.id")
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now, sa_column_kwargs={"onupdate": utc_now})
+
 class PlatformConfig(SQLModel, table=True):
     """
     A single-row-per-key store for platform-wide server configuration.

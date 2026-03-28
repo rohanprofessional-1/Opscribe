@@ -13,6 +13,22 @@ const BASE =
   (import.meta as unknown as { env: { VITE_API_URL?: string } }).env
     ?.VITE_API_URL ?? "/api";
 
+let globalToken: string | null = null;
+
+export const setApiToken = (token: string | null) => {
+  globalToken = token;
+};
+
+export const authFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  return fetch(input, {
+    ...init,
+    headers: {
+      ...init?.headers,
+      ...(globalToken ? { Authorization: `Bearer ${globalToken}` } : {})
+    }
+  });
+};
+
 async function request<T>(
   path: string,
   options: RequestInit & { parseJson?: boolean } = {},
@@ -21,7 +37,7 @@ async function request<T>(
   const url = path.startsWith("http")
     ? path
     : `${BASE.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
-  const res = await fetch(url, {
+  const res = await authFetch(url, {
     ...init,
     credentials: "include",
     headers: {

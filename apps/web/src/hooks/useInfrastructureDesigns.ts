@@ -17,13 +17,14 @@ function graphToDesign(g: {
   };
 }
 
-export function useInfrastructureDesigns() {
+export function useInfrastructureDesigns(tokenReady: boolean) {
   const [clientId, setClientId] = useState<string | null>(null);
   const [designs, setDesigns] = useState<InfrastructureDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!tokenReady) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -47,7 +48,7 @@ export function useInfrastructureDesigns() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tokenReady]);
 
   const createDesignAsync = useCallback((): Promise<InfrastructureDesign> => {
     if (!clientId) return Promise.reject(new Error("Client not loaded"));
