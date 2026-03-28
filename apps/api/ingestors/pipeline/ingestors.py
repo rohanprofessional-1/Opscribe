@@ -57,34 +57,45 @@ class GitHubIngestor(BaseIngestor):
 
         results: List[DiscoveryResult] = []
         for repo in repos:
-            print(f"DEBUG: Processing repo: {repo.repo_url}")
+            logger.info(f"Processing repo: {repo.repo_url}")
             repo.ingestion_status = "running"
             self.session.add(repo)
             self.session.commit()
 
             try:
-                print(f"DEBUG: Fetching installation token for ID: {repo.installation_id}")
                 token = await get_installation_token(repo.installation_id, str(self.client_id), self.session)
-                print("DEBUG: Token fetched successfully. Starting GitHubIngestionPipeline...")
                 pipeline = GitHubIngestionPipeline(
                     repo_url=repo.repo_url,
                     branch=repo.default_branch or "main",
                     access_token=token,
                 )
                 result = await pipeline.run()
-                print(f"DEBUG: Pipeline run completed. Nodes: {len(result.nodes)}, Edges: {len(result.edges)}")
+                
+                # Enrich metadata with client-specific context (Spec §2)
+                repo_full_name = (
+                    repo.repo_url.split("github.com/")[-1]
+                    if "github.com/" in repo.repo_url
+                    else repo.repo_url
+                )
+                result.metadata.update({
+                    "installation_id": repo.installation_id,
+                    "repo_full_name": repo_full_name,
+                    "repo_url": repo.repo_url,
+                    "repo_id": str(getattr(repo, "repo_id", "")),
+                    "ingestion_type": "manual",
+                })
+                
+                logger.info(
+                    f"Pipeline complete for {repo.repo_url}: "
+                    f"{len(result.nodes)} nodes, {len(result.edges)} edges"
+                )
                 results.append(result)
                 
                 repo.ingestion_status = "success"
                 repo.last_ingested_at = utc_now()
                 self.session.add(repo)
                 self.session.commit()
-                print(f"DEBUG: Database updated for repo {repo.repo_url}")
 
-                logger.info(
-                    f"GitHub ingestion for {repo.repo_url}: "
-                    f"{len(result.nodes)} nodes, {len(result.edges)} edges"
-                )
             except Exception as e:
                 repo.ingestion_status = "failed"
                 self.session.add(repo)

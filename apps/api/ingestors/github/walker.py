@@ -1,120 +1,64 @@
 import os
 import asyncio
-import tempfile
-import fnmatch
 import subprocess
-from typing import List, Tuple, Optional
+import logging
+from typing import List, Optional
 from pathlib import Path
-
 from apps.api.ingestors.github.models import FileMetadata, ParseableFileSet
-from apps.api.ingestors.github.utils import _get_auth_url
+
+logger = logging.getLogger(__name__)
 
 class RepositoryWalker:
-    async def _run_command(self, *args, cwd: Optional[str] = None) -> Tuple[str, str, int]:
-        process = await asyncio.create_subprocess_exec(
-            *args,
-            cwd=cwd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        return stdout.decode('utf-8', errors='replace').strip(), stderr.decode('utf-8', errors='replace').strip(), process.returncode or 0
+    def __init__(self, repo_url: str, branch: str, auth_url: Optional[str] = None):
+        self.repo_url = repo_url
+        self.branch = branch
+        self.auth_url = auth_url or repo_url
 
-    async def _get_last_commit_sha(self, repo_dir: str, file_path: str) -> str:
-        stdout, _, _ = await self._run_command("git", "log", "-n", "1", "--pretty=format:%H", "--", file_path, cwd=repo_dir)
-        return stdout
-
-    def _is_tier_1(self, filename: str) -> bool:
-        patterns = [
-            "Dockerfile", "docker-compose*.yml", "*.tf", "*.bicep",
-            "*.yaml", "*.yml", "*requirements*.txt", "package.json", "pyproject.toml"
-        ]
-        return any(fnmatch.fnmatch(filename, p) for p in patterns)
-
-    def _is_tier_2(self, rel_path: str, filename: str) -> bool:
-        doc_patterns = ["*.py", "*.ts", "*.go", "*.java"]
-        if not any(fnmatch.fnmatch(filename, p) for p in doc_patterns):
-            return False
-            
-        if os.path.dirname(rel_path) == "":
-            return True
-            
-        allowed_dirs = {"infra", "deploy", "config", "src"}
-        parts = Path(rel_path).parts
-        if parts and parts[0] in allowed_dirs:
-            return True
-            
-        return False
-
-    def _is_tier_3(self, rel_path: str) -> bool:
-        """Tier 3: Skip defaults (modules, git internals, tests, lockfiles)"""
-        skip_dirs = {".git", "node_modules", "venv", "__pycache__", ".venv"}
-        parts = Path(rel_path).parts
-        if any(d in skip_dirs for d in parts):
-            return True
-            
-        path_lower = str(rel_path).lower()
-        if "test" in path_lower:
-            return True
-        if "lock" in path_lower:
-            return True
-            
-        return False
-
-    async def clone_and_walk(self, repo_url: str, branch: str, access_token: str) -> ParseableFileSet:
-        auth_url = _get_auth_url(repo_url, access_token)
-        with tempfile.TemporaryDirectory() as temp_dir:
-            stdout, stderr, rc = await self._run_command(
-                "git", "clone", "--depth=1", "--branch", branch, auth_url, ".", 
-                cwd=temp_dir
+    async def _clone_repo(self, temp_dir: str):
+        """Clone the repository into the specified directory."""
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "git", "clone", "--depth=1", "--branch", self.branch, self.auth_url, ".",
+                cwd=temp_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
-            if rc != 0:
-                raise Exception(f"Failed to clone repository: {stderr}")
-
-            tier_1_files: List[FileMetadata] = []
-            tier_2_files: List[FileMetadata] = []
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60.0)
+            if process.returncode != 0:
+                error_msg = stderr.decode().strip()
+                logger.error(f"Git clone failed: {error_msg}")
+                raise Exception(f"Failed to clone repository: {error_msg}")
             
-            # Tasks for fetching SHAs concurrently to speed up the loop
-            sha_tasks = []
-            metadata_placeholders = []
+            logger.info(f"Successfully cloned {self.repo_url} (branch: {self.branch}) to {temp_dir}")
+        except asyncio.TimeoutError:
+            logger.error(f"Git clone timed out for {self.repo_url}")
+            raise Exception("Git clone timed out")
 
-            for root, _, files in os.walk(temp_dir):
-                for file in files:
-                    full_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(full_path, temp_dir)
-                    
-                    if self._is_tier_3(rel_path):
-                        continue
+    async def walk(self, temp_dir: str) -> ParseableFileSet:
+        """Walk the repository and categorize files."""
+        await self._clone_repo(temp_dir)
+        tier_1_files: List[FileMetadata] = []
+        tier_2_files: List[FileMetadata] = []
+        t1_extensions = {".tf", ".hcl", ".yaml", ".yml", ".json"}
+        t1_names = {"docker-compose", "package.json", "requirements.txt", "go.mod", "pom.xml"}
+        skip_dirs = {".git", "node_modules", "venv", "__pycache__", "tests", "test"}
 
-                    is_t1 = self._is_tier_1(file)
-                    is_t2 = False if is_t1 else self._is_tier_2(rel_path, file)
-
-                    if is_t1 or is_t2:
-                        size = os.path.getsize(full_path)
-                        ext = "".join(Path(file).suffixes) if Path(file).suffixes else ""
-                        
-                        placeholder = {
-                            "path": rel_path,
-                            "extension": ext,
-                            "size_bytes": size,
-                            "is_t1": is_t1
-                        }
-                        metadata_placeholders.append(placeholder)
-                        sha_tasks.append(self._get_last_commit_sha(temp_dir, rel_path))
-
-            # Fetch all SHAs concurrently
-            shas = await asyncio.gather(*sha_tasks)
-
-            for placeholder, sha in zip(metadata_placeholders, shas):
-                meta = FileMetadata(
-                    path=placeholder["path"],
-                    extension=placeholder["extension"],
-                    size_bytes=placeholder["size_bytes"],
-                    last_commit_sha=sha
-                )
-                if placeholder["is_t1"]:
-                    tier_1_files.append(meta)
-                else:
-                    tier_2_files.append(meta)
-
-            return ParseableFileSet(tier_1_files=tier_1_files, tier_2_files=tier_2_files)
+        for root, dirs, files in os.walk(temp_dir):
+            dirs[:] = [d for d in dirs if d.lower() not in skip_dirs]
+            for file in files:
+                rel_path = os.path.relpath(os.path.join(root, file), temp_dir)
+                ext = os.path.splitext(file)[1].lower()
+                is_t1 = ext in t1_extensions or any(n in file.lower() for n in t1_names)
+                if is_t1:
+                    tier_1_files.append(FileMetadata(
+                        path=rel_path,
+                        extension=ext,
+                        size_bytes=os.path.getsize(os.path.join(root, file))
+                    ))
+                elif ext in {".py", ".ts", ".js", ".go", ".java", ".cs", ".rb"}:
+                    tier_2_files.append(FileMetadata(
+                        path=rel_path,
+                        extension=ext,
+                        size_bytes=os.path.getsize(os.path.join(root, file))
+                    ))
+        return ParseableFileSet(tier_1_files=tier_1_files, tier_2_files=tier_2_files)
