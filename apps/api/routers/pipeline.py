@@ -8,11 +8,12 @@ from pydantic import BaseModel
 from typing import Optional, List
 from uuid import UUID
 
-from apps.api.database import get_session
+from apps.api.database import engine, get_session
 from apps.api.models import Client, ConnectedRepository, ClientIntegration
 from apps.api.utils.encryption import decrypt_dict
 
 import logging
+from apps.api.routers.integrations import SENSITIVE_KEYS
 from apps.api.ingestors.pipeline.ingestors import AWSIngestor, GitHubIngestor, GitHubLinkIngestor
 from apps.api.ingestors.pipeline.s3_exporter import S3Exporter
 from apps.api.ingestors.pipeline.base import BaseIngestor, BaseExporter
@@ -56,9 +57,13 @@ async def run_export(
             await exporter.export(client_id=client_id, results=results, label="export")
             
             # Post-export: Ingest to graph for visualization
-            from apps.api.database import engine
-            with Session(engine) as session:
-                await ingest_to_all_clients(results=results, original_client_id=client_id, session=session)
+            # We pull the combined state from MinIO to ensure both AWS + GitHub are represented
+            combined_results = await exporter.load_current(client_id=client_id)
+            if combined_results:
+                with Session(engine) as session:
+                    await ingest_to_all_clients(results=combined_results, original_client_id=client_id, session=session)
+            else:
+                logger.warning(f"No current state results found for client {client_id} despite successful export.")
     except Exception as e:
         logger.error(f"Pipeline export failed: {e}")
 
@@ -82,9 +87,6 @@ async def trigger_export(
             ClientIntegration.is_active == True
         )
     ).first()
-
-    # Import the source of truth for encrypted keys
-    from apps.api.routers.integrations import SENSITIVE_KEYS
 
     ingestors: List[BaseIngestor] = []
     if request.include_aws:
@@ -131,7 +133,6 @@ async def trigger_github_link(
         )
     ).first()
 
-    from apps.api.routers.integrations import SENSITIVE_KEYS
     aws_creds = decrypt_dict(aws_integration.credentials, SENSITIVE_KEYS) if aws_integration else {}
     
     ingestors: List[BaseIngestor] = [

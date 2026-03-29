@@ -4,8 +4,8 @@ S3 Exporter — Per-Tenant Data Lake Export
 Exports DiscoveryResult payloads to S3/MinIO as JSON, conforming to the
 raw_v1 schema spec. Implements:
 
-  - Partitioned storage: {client_id}/{source}/date=YYYY-MM-DD/hour=HH/ingestion_{uuid}.json
-  - Latest pointer:      {client_id}/{source}/latest.json
+  - Partitioned storage: {client_id}/history/{source}/YYYY-MM-DD-HH-MM-SS.json
+  - Latest pointer:      {client_id}/current/{source}.json
   - Full ingestion_metadata envelope (Spec §2)
   - Real content_hash fingerprinting (Spec §3)
   - DiscoveryEdge serialization (Spec §5)
@@ -39,6 +39,8 @@ class S3Exporter(BaseExporter):
 
         endpoint_url = env.get("AWS_S3_ENDPOINT_URL") or os.environ.get("AWS_S3_ENDPOINT_URL")
         region = env.get("AWS_REGION") or os.environ.get("AWS_REGION", "us-east-1")
+
+        # Utilize minio for local development
         access_key = env.get("OPSCRIBE_MINIO_USER") or os.environ.get("AWS_ACCESS_KEY_ID")
         secret_key = env.get("OPSCRIBE_MINIO_PASSWORD") or os.environ.get("AWS_SECRET_ACCESS_KEY")
 
@@ -109,12 +111,11 @@ class S3Exporter(BaseExporter):
         Export DiscoveryResults to S3 for a given client_id.
 
         S3 key structure (Spec §9):
-            {client_id}/{source}/latest.json
-            {client_id}/{source}/date={YYYY-MM-DD}/hour={HH}/ingestion_{uuid}.json
+            {client_id}/current/{source}.json
+            {client_id}/history/{source}/{YYYY-MM-DD-HH-MM-SS}.json
         """
         now = datetime.now(timezone.utc)
-        date_str = now.strftime("%Y-%m-%d")
-        hour_str = now.strftime("%H")
+        timestamp_str = now.strftime("%Y-%m-%d-%H-%M-%S")
         ingestion_id = str(uuid.uuid4())
 
         grouped_results: dict[str, list[DiscoveryResult]] = defaultdict(list)
@@ -167,11 +168,8 @@ class S3Exporter(BaseExporter):
 
             body = json.dumps(payload, indent=2, default=str)
 
-            latest_key = f"{client_id}/{source}/latest.json"
-            history_key = (
-                f"{client_id}/{source}/date={date_str}/hour={hour_str}"
-                f"/ingestion_{ingestion_id}.json"
-            )
+            latest_key = f"{client_id}/current/{source}.json"
+            history_key = f"{client_id}/history/{source}/{timestamp_str}.json"
 
             try:
                 # Upload latest pointer
@@ -199,3 +197,39 @@ class S3Exporter(BaseExporter):
                 raise
 
         return ",".join(uploaded_keys)
+
+    async def load_current(self, client_id: str) -> List[DiscoveryResult]:
+        """
+        Load the combined 'current' state of all sources for a client from MinIO/S3.
+        """
+
+        prefix = f"{client_id}/current/"
+        logger.info(f"Loading current state from S3: bucket={self.bucket}, prefix={prefix}")
+
+        results: List[DiscoveryResult] = []
+
+        try:
+            response = self.s3.list_objects_v2(Bucket=self.bucket, Prefix=prefix)
+
+            if "Contents" not in response:
+                logger.warning(f"No 'current' data found in S3 for client {client_id}")
+                return results
+
+            for obj in response["Contents"]:
+                key = obj["Key"]
+                if not key.endswith(".json"):
+                    continue
+
+                logger.info(f"Fetching current state: {key}")
+                res = self.s3.get_object(Bucket=self.bucket, Key=key)
+                payload = json.loads(res["Body"].read().decode("utf-8"))
+
+                for source_data in payload.get("sources", []):
+                    results.append(DiscoveryResult(**source_data))
+
+            logger.info(f"Loaded {len(results)} DiscoveryResults from S3 for client {client_id}")
+            return results
+
+        except ClientError as e:
+            logger.error(f"Failed to load current state from S3 for client {client_id}: {e}")
+            raise

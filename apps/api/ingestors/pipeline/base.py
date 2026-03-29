@@ -44,3 +44,16 @@ class BaseExporter(ABC):
             str: Identifier/path of the exported data
         """
         ...
+
+    @abstractmethod
+    async def load_current(self, client_id: str) -> List[DiscoveryResult]:
+        """
+        Load the combined 'current' state of all sources for a client from the backend.
+        
+        Args:
+            client_id: The tenant/client ID string
+            
+        Returns:
+            List[DiscoveryResult]: Combined list of results from all sources
+        """
+        ...
