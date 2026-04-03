@@ -85,10 +85,11 @@ async def query_rag(request: RagQueryRequest, session: Session = Depends(get_ses
         raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured.")
 
     from langchain_groq import ChatGroq
+    # llama-3.1-70b is more reliable for tool use than 3.3-70b on Groq
     llm = ChatGroq(
         temperature=0,
         groq_api_key=api_key,
-        model_name="llama-3.3-70b-versatile",
+        model_name="llama-3.1-70b-versatile",
     )
 
     # ── Step 1: Classify intent ──────────────────────────────────────
@@ -131,6 +132,25 @@ def _handle_rag(request: RagQueryRequest, session: Session) -> RagQueryResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _parse_xml_tool_call(err_str: str) -> Optional[Dict[str, Any]]:
+    """
+    When Groq emits pseudo-XML like:
+        <function=find_node_by_name{"node_name": "API Gateway"}</function>
+    it raises a 400 tool_use_failed error with the bad output in 'failed_generation'.
+    This parser extracts the tool name and args so we can run the tool directly.
+    """
+    import re, json
+    match = re.search(r'<function=(\w+)(\{.*?\})', err_str, re.DOTALL)
+    if not match:
+        return None
+    tool_name = match.group(1)
+    try:
+        args = json.loads(match.group(2))
+        return {"tool_name": tool_name, "args": args}
+    except json.JSONDecodeError:
+        return None
+
+
 def _handle_traversal(
     request: RagQueryRequest,
     session: Session,
@@ -142,6 +162,7 @@ def _handle_traversal(
         from langchain_core.messages import HumanMessage
 
         tools = get_graph_traversal_tools(session, request.graph_id)
+        tools_by_name = {t.name: t for t in tools}
 
         system_prompt = (
             "You are the Opscribe Graph Traversal Agent.\n\n"
@@ -161,7 +182,9 @@ def _handle_traversal(
             "- If a node is not found, suggest similar names.\n"
             "- Explain WHY the dependency/impact chain matters, not just WHAT it is.\n\n"
             "### CRITICAL TOOL BEHAVIOR:\n"
-            "If you decide to invoke a tool, you MUST output ONLY the tool call. Do not provide any conversational text, explanations, or thoughts before calling the tool. Just directly execute the tool."
+            "If you decide to invoke a tool, you MUST output ONLY the tool call. "
+            "Do not provide any conversational text, explanations, or thoughts before calling the tool. "
+            "Just directly execute the tool."
         )
 
         agent = create_agent(
@@ -170,16 +193,36 @@ def _handle_traversal(
             system_prompt=system_prompt,
         )
 
-        result = agent.invoke({"messages": [HumanMessage(content=request.query)]})
+        try:
+            result = agent.invoke({"messages": [HumanMessage(content=request.query)]})
+            messages = result.get("messages", [])
+            answer = "I could not analyze the graph for this question."
+            if messages:
+                last_msg = messages[-1]
+                if hasattr(last_msg, "content"):
+                    answer = last_msg.content
+            return RagQueryResponse(items=[], answer=answer, route="traversal")
 
-        # Extract the final AI message content
-        messages = result.get("messages", [])
-        answer = "I could not analyze the graph for this question."
-        if messages:
-            last_msg = messages[-1]
-            if hasattr(last_msg, "content"):
-                answer = last_msg.content
+        except Exception as agent_err:
+            # ── Groq XML pseudo-format fallback ──────────────────────────
+            # When the model emits <function=...> XML instead of a real tool call,
+            # Groq returns 400 tool_use_failed. We parse it and run the tool directly.
+            err_str = str(agent_err)
+            if "tool_use_failed" in err_str or "<function=" in err_str:
+                parsed = _parse_xml_tool_call(err_str)
+                if parsed:
+                    tool = tools_by_name.get(parsed["tool_name"])
+                    if tool:
+                        tool_result = tool.run(parsed["args"])
+                        answer = (
+                            f"🔀 **Graph Traversal**\n\n{tool_result}\n\n"
+                            f"*The AI used a fallback execution path for `{parsed['tool_name']}`.*"
+                        )
+                        return RagQueryResponse(items=[], answer=answer, route="traversal")
+            raise HTTPException(status_code=500, detail=err_str)
 
-        return RagQueryResponse(items=[], answer=answer, route="traversal")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

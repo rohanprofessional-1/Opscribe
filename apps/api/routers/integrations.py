@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from apps.api.database import get_session
 from apps.api.models import ClientIntegration
-from apps.api.utils.encryption import encrypt_dict
+from apps.api.utils.encryption import encrypt_dict, decrypt_dict
 
 router = APIRouter(
     prefix="/integrations",
@@ -59,14 +59,29 @@ def save_integration(
 ):
     """Save or update an integration configuration (e.g. AWS credentials)."""
     
+    statement = select(ClientIntegration).where(
+        ClientIntegration.client_id == client_id,
+        ClientIntegration.provider == provider
+    )
+    existing = session.exec(statement).first()
+    
+    # Merge existing credentials with new ones
+    final_credentials = decrypt_dict(existing.credentials, SENSITIVE_KEYS) if existing else {}
+    for k, v in config.credentials.items():
+        if v is not None and str(v).strip() != "":
+            final_credentials[k] = str(v).strip()
+            
+    if not final_credentials:
+        raise HTTPException(status_code=400, detail="Cannot save empty credentials.")
+
     # Pre-flight Validation for AWS
     if provider == "aws":
         try:
             from apps.api.ingestors.aws.detector import AWSDetector
-            region = config.credentials.get("region", "us-east-1")
+            region = final_credentials.get("region", "us-east-1")
             # If standard STS fails, _get_account_id gracefully falls back to 000000000000
             # but we explicitly want to block invalid credentials here.
-            detector = AWSDetector(region_name=region, credentials=config.credentials)
+            detector = AWSDetector(region_name=region, credentials=final_credentials)
             account_id = detector._get_account_id()
             if account_id == "000000000000":
                 raise ValueError("Invalid IAM Role or Access Keys. Connection could not be established.")
@@ -81,8 +96,8 @@ def save_integration(
             import time
             import jwt
             
-            app_id = config.credentials.get("github_app_id", "").strip()
-            pem = config.credentials.get("github_private_key", "").strip()
+            app_id = final_credentials.get("github_app_id", "").strip()
+            pem = final_credentials.get("github_private_key", "").strip()
             
             if not app_id or not pem:
                 raise ValueError("Missing App ID or Private Key.")
@@ -90,7 +105,7 @@ def save_integration(
             # Users frequently mis-copy PEM strings (e.g. 4 hyphens instead of 5)
             if pem.startswith("----BEGIN") and not pem.startswith("-----BEGIN"):
                 pem = "-" + pem
-                config.credentials["github_private_key"] = pem
+                final_credentials["github_private_key"] = pem
             
             # Normalise any literal \n sequences
             pem = pem.replace("\\n", "\n")
@@ -141,14 +156,8 @@ def save_integration(
             print(f"DEBUG: GitHub App pre-flight network hit generic exception: {e}")
             raise HTTPException(status_code=400, detail=f"Failed to validate credentials: {str(e)}")
 
-    statement = select(ClientIntegration).where(
-        ClientIntegration.client_id == client_id,
-        ClientIntegration.provider == provider
-    )
-    existing = session.exec(statement).first()
-    
     # Encrypt sensitive keys before saving
-    safe_credentials = encrypt_dict(config.credentials, SENSITIVE_KEYS)
+    safe_credentials = encrypt_dict(final_credentials, SENSITIVE_KEYS)
     
     if existing:
         existing.credentials = safe_credentials

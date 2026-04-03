@@ -155,25 +155,21 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                 throw new Error(errData?.detail || "Failed to validate and save AWS credentials.");
             }
 
-            // If we provided new keys/roles, trigger a fresh ingestion immediately
-            if (Object.keys(credentialsPayload).length > 1) {
-                await fetch(`${API_BASE}/pipeline/export`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        client_id: clientId,
-                        include_aws: true,
-                        include_github: false,
-                        aws_region: awsRegion
-                    })
-                });
+            // Always trigger a fresh ingestion immediately (backend merges existing creds safely)
+            await fetch(`${API_BASE}/pipeline/export`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    include_aws: true,
+                    include_github: false,
+                    aws_region: awsRegion
+                })
+            });
 
-                setAwsStatus({ type: "success", text: "Integrations saved & discovery started!" });
-                setAwsAccessKey(""); setAwsSecretKey(""); setRoleArn(""); setExternalId("");
-            } else {
-                // If we didn't provide new keys, we just successfully updated the region/metadata
-                setAwsStatus({ type: "success", text: "Configuration saved using existing credentials." });
-            }
+            setAwsStatus({ type: "success", text: "Integrations saved & discovery started!" });
+            setAwsAccessKey(""); setAwsSecretKey(""); setRoleArn(""); setExternalId("");
+
             fetchIntegrations(clientId);
         } catch (e: any) {
             setAwsStatus({ type: "error", text: e.message || "Failed to save integrations" });
