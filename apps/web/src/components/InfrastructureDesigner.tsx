@@ -344,7 +344,6 @@ export default function InfrastructureDesigner({
   return (
     <div className="flex h-screen bg-gray-950">
       <NodePalette onDragStart={onDragStart} />
-      <GithubConnectPanel />
 
       <div className="flex-1 relative" ref={reactFlowWrapper}>
         {loadingVisualization && (
