@@ -1,9 +1,12 @@
+import logging
 from uuid import UUID
 from datetime import datetime
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from apps.api.models import Graph, Node, Edge
 from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
 from apps.api.ai_infrastructure.rag.embeddings import EmbeddingService
+
+logger = logging.getLogger(__name__)
 
 class GraphIngestor:
     def __init__(self, session: Session):
@@ -20,6 +23,12 @@ class GraphIngestor:
         graph = self.session.get(Graph, graph_id)
         if not graph:
             raise ValueError(f"Graph with ID {graph_id} not found")
+
+        # 2. Purge stale embeddings for this graph (deduplication)
+        self.session.exec(
+            delete(KnowledgeBaseItem).where(KnowledgeBaseItem.graph_id == graph_id)
+        )
+        logger.info(f"Purged existing embeddings for graph {graph_id}")
 
         # 2. Process Nodes
         for node in graph.nodes:

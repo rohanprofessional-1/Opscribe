@@ -23,7 +23,7 @@ interface RAGChatProps {
 export default function RAGChat({ clientId, graphId, nodes, edges, designName, onClose }: RAGChatProps) {
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
-    const [messages, setMessages] = useState<Array<{ role: "user" | "bot"; content: string; metadata?: any }>>([
+    const [messages, setMessages] = useState<Array<{ role: "user" | "bot"; content: string; metadata?: any; route?: string }>>([
         { role: "bot", content: "Hello! I am your AI architect. I am looking at the graph you are currently designing. Ask me anything about it!" }
     ]);
     const [status, setStatus] = useState<string | null>(null);
@@ -77,7 +77,8 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
             const botMsg = {
                 role: "bot" as const,
                 content: res.answer,
-                metadata: res.items // These are the chunks
+                metadata: res.items, // These are the chunks
+                route: res.route,
             };
 
             setMessages(prev => [...prev, botMsg]);
@@ -118,6 +119,14 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
                             {m.role === "bot" ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                         </div>
                         <div className={`max-w-[80%] p-4 rounded-2xl ${m.role === "bot" ? "bg-gray-900 border border-gray-800" : "bg-blue-600 text-white"}`}>
+                            {m.role === "bot" && m.route && (
+                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider mb-2 px-2 py-0.5 rounded-full ${m.route === "traversal"
+                                        ? "bg-purple-900/40 text-purple-300 border border-purple-700/50"
+                                        : "bg-blue-900/40 text-blue-300 border border-blue-700/50"
+                                    }`}>
+                                    {m.route === "traversal" ? "🔀 Graph Traversal" : "📚 RAG"}
+                                </span>
+                            )}
                             <div className="whitespace-pre-wrap text-sm font-sans">{m.content}</div>
                             {m.metadata && (m.metadata as any[]).length > 0 && (
                                 <div className="mt-4 pt-4 border-t border-gray-800">

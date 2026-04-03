@@ -136,8 +136,8 @@ export const api = {
     query: string,
     graphId?: string,
     limit: number = 5,
-  ): Promise<{ items: any[]; answer: string }> {
-    return request<{ items: any[]; answer: string }>("rag/query", {
+  ): Promise<{ items: any[]; answer: string; route?: string }> {
+    return request<{ items: any[]; answer: string; route?: string }>("rag/query", {
       method: "POST",
       body: JSON.stringify({ tenant_id: tenantId, query, limit, ...(graphId ? { graph_id: graphId } : {}) }),
     });

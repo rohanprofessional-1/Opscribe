@@ -8,7 +8,7 @@ def get_rag_search_tool(session: Session, tenant_id: UUID) -> BaseTool:
     This allows the Agent to fetch real infrastructure context on demand.
     """
     
-    @tool(name="search_infrastructure_graph", return_direct=False)
+    @tool("search_infrastructure_graph", return_direct=False)
     def search_infrastructure_graph(query: str) -> str:
         """
         Searches the Opscribe vector database for infrastructure context.

@@ -7,6 +7,7 @@ from apps.api.database import engine
 from apps.api.models import Node, Edge, NodeType, EdgeType, Graph
 from apps.api.infrastructure.processor.pipeline import InfrastructurePipeline
 from apps.api.ingestors.aws.schemas import DiscoveryResult
+from apps.api.ai_infrastructure.rag.embedding_sync import re_embed_graph
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +155,9 @@ async def ingest_to_graph(client_id: str, results: List[DiscoveryResult], sessio
         _session.commit()
         logger.info(f"Ingested {len(context.nodes)} nodes and {len(context.edges)} potential edges to Graph {graph_id} for client {client_id_str}")
         print(f"DEBUG: Successfully ingested {len(context.nodes)} nodes to Graph {graph_id}")
+
+        # Re-embed the updated graph so the vector store stays in sync
+        re_embed_graph(graph_id)
         
     except Exception as e:
         _session.rollback()

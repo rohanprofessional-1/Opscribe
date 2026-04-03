@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlmodel import Session, select, delete as sql_delete
 from typing import List
 from uuid import UUID
 
@@ -7,6 +7,8 @@ from apps.api.database import get_session
 from apps.api.models import Graph, Node, Edge, NodeType, EdgeType
 from apps.api import schemas
 from apps.api.schemas import GraphSyncUpdate
+from apps.api.ai_infrastructure.rag.embedding_sync import re_embed_graph
+from apps.api.ai_infrastructure.rag.models import KnowledgeBaseItem
 
 router = APIRouter(
     prefix="/graphs",
@@ -52,6 +54,7 @@ def visualize_graph(graph_id: UUID, session: Session = Depends(get_session)):
 def sync_graph(
     graph_id: UUID,
     body: GraphSyncUpdate,
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ):
     """
@@ -99,9 +102,14 @@ def sync_graph(
         session.add(edge_type)
         session.flush()
 
+    # Clear all edges first to prevent ORM cascade issues when deleting nodes
+    for edge in session.exec(select(Edge).where(Edge.graph_id == graph_id)).all():
+        session.delete(edge)
+    session.flush()
+
     payload_keys = {n.id for n in body.nodes}
 
-    # Remove nodes (and their edges) that are no longer in the payload
+    # Remove nodes that are no longer in the payload
     existing_nodes = session.exec(select(Node).where(Node.graph_id == graph_id)).all()
     for node in existing_nodes:
         if node.key not in payload_keys:
@@ -143,11 +151,7 @@ def sync_graph(
         for node in session.exec(select(Node).where(Node.graph_id == graph_id)).all()
     }
 
-    # Replace edges: delete existing, create from payload
-    for edge in session.exec(select(Edge).where(Edge.graph_id == graph_id)).all():
-        session.delete(edge)
-    session.flush()
-
+    # Edges from payload
     for e in body.edges:
         from_id = key_to_node.get(e.source)
         to_id = key_to_node.get(e.target)
@@ -165,6 +169,7 @@ def sync_graph(
 
     session.commit()
     session.refresh(graph)
+    background_tasks.add_task(re_embed_graph, graph_id)
     return graph
 
 
@@ -173,6 +178,8 @@ def delete_graph(graph_id: UUID, session: Session = Depends(get_session)):
     graph = session.get(Graph, graph_id)
     if not graph:
         raise HTTPException(status_code=404, detail="Graph not found")
+    # Clean up vector store entries for this graph
+    session.exec(sql_delete(KnowledgeBaseItem).where(KnowledgeBaseItem.graph_id == graph_id))
     session.delete(graph)
     session.commit()
     return {"ok": True}

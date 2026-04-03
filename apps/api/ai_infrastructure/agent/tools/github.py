@@ -7,7 +7,7 @@ def get_github_actions_tool(session: Session, tenant_id: UUID) -> BaseTool:
     Tool that interacts with a user's GitHub Actions via the Opscribe Installation Token.
     """
     
-    @tool(name="github_actions_manager", return_direct=True)
+    @tool("github_actions_manager", return_direct=True)
     def github_actions_manager(action: str, repo: str, workflow_id: str = "") -> str:
         """
         Interacts with GitHub Actions.

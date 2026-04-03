@@ -3,8 +3,8 @@ from uuid import UUID
 import os
 
 from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
+from langchain_core.messages import HumanMessage
 from sqlmodel import Session
 
 # Import tools (these will be built out individually)
@@ -12,22 +12,23 @@ from apps.api.ai_infrastructure.agent.tools.rag import get_rag_search_tool
 from apps.api.ai_infrastructure.agent.tools.terraform import get_terraform_generator_tool
 from apps.api.ai_infrastructure.agent.tools.github import get_github_actions_tool
 from apps.api.ai_infrastructure.agent.tools.compliance import get_iam_compliance_tool
+from apps.api.ai_infrastructure.agent.tools.graph_tools import get_graph_traversal_tools
 
 class AgentOrchestrator:
     """
-    Replaces the legacy ChatService. 
-    This Orchestrator provides the LLM with a suite of tools it can use 
-    to interact with the infrastructure, generate files, and trigger workflows.
+    Orchestrator Agent with READ/WRITE separation:
+      - READ: RAG search + graph traversal tools (no side effects)
+      - WRITE: explains what would be done (WorkflowSpec emission comes later)
     """
-    def __init__(self, session: Session, tenant_id: UUID):
+    def __init__(self, session: Session, tenant_id: UUID, graph_id: Optional[UUID] = None):
         self.session = session
         self.tenant_id = tenant_id
+        self.graph_id = graph_id
         
         self.api_key = os.getenv("GROQ_API_KEY")
         self.model = "llama-3.3-70b-versatile"
         
         if self.api_key:
-            # We use an LLM that supports Tool Calling natively
             self.llm = ChatGroq(
                 temperature=0, 
                 groq_api_key=self.api_key, 
@@ -41,8 +42,12 @@ class AgentOrchestrator:
             get_rag_search_tool(session, tenant_id),
             get_terraform_generator_tool(),
             get_github_actions_tool(session, tenant_id),
-            get_iam_compliance_tool(session, tenant_id)
+            get_iam_compliance_tool(session, tenant_id),
         ]
+
+        # Add graph traversal tools if a graph_id is provided
+        if graph_id:
+            self.tools.extend(get_graph_traversal_tools(session, graph_id))
         
         self._setup_agent()
 
@@ -50,34 +55,52 @@ class AgentOrchestrator:
         if not self.llm:
             return
 
-        # System prompt defines the persona and rules for tool usage
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are the **Opscribe Enterprise Architect & Agent**. 
+        system_prompt = (
+            "You are the **Opscribe Enterprise Architect & Agent**.\n\n"
+            "Your MAJOR priority is **Explanation and Action**. You make difficult "
+            "infrastructure concepts easy for *anyone* to understand, and you take "
+            "action on their behalf.\n\n"
+            "### READ vs WRITE AWARENESS:\n"
+            "- **READ Questions** (about existing infrastructure): Use RAG search and "
+            "graph traversal tools. These are safe, read-only operations.\n"
+            "- **WRITE Questions** (provisioning, scaling, destroying): Do NOT execute "
+            "directly. Instead, describe what WOULD be done as a structured action plan. "
+            "Explain the steps, the tools involved (Terraform, Helm, etc.), and what "
+            "approval would be needed.\n\n"
+            "### COMMANDMENTS:\n"
+            "- **Analogy-Led Learning**: Use real-world analogies.\n"
+            "- **Plain English**: Avoid strict jargon unless defined.\n"
+            "- **Action-Oriented**: For read questions, use your tools to fetch real data. "
+            "For write questions, explain the plan.\n"
+            "- **Always Search First**: If the user asks about their infrastructure, "
+            "ALWAYS use a search or traversal tool first before answering.\n"
+            "- **Graph Traversal**: For dependency, impact, or flow questions, prefer "
+            "graph traversal tools over RAG search.\n\n"
+            "### STAKEHOLDER DOCS\n"
+            "If asked for a stakeholder doc or runbook, generate a highly structured "
+            "markdown response highlighting business impact.\n\n"
+            "### CRITICAL TOOL BEHAVIOR:\n"
+            "If you decide to invoke a tool, you MUST output ONLY the tool call. Do not provide any conversational text, explanations, or thoughts before calling the tool. Just directly execute the tool."
+        )
 
-Your MAJOR priority is **Explanation and Action**. You make difficult infrastructure concepts easy for *anyone* to understand, and you take action on their behalf.
-
-### COMMANDMENTS:
-- **Analogy-Led Learning**: Use real-world analogies.
-- **Plain English**: Avoid strict jargon unless defined.
-- **Action-Oriented**: If the user asks for a Terraform file or a GitHub action, use your tools to do it. Do not just output the code in chat; use the tool to write the file or trigger the workflow.
-- **Always Search First**: If the user asks about their infrastructure, ALWAYS use the RAG Search tool first before answering.
-
-### STAKEHOLDER DOCS
-If asked for a stakeholder doc or runbook, generate a highly structured markdown response highlighting business impact.
-"""),
-            ("user", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
-
-        # Bind the tools to the LLM to create an agent
-        agent = create_tool_calling_agent(self.llm, self.tools, prompt)
-        
-        # The Executor handles the loop of (Thought -> Action -> Observation -> Answer)
-        self.agent_executor = AgentExecutor(agent=agent, tools=self.tools, verbose=True)
+        self.agent = create_agent(
+            model=self.llm,
+            tools=self.tools,
+            system_prompt=system_prompt,
+        )
 
     def run(self, query: str) -> str:
         if not self.llm:
             return "Error: GROQ_API_KEY not found in environment variables."
             
-        response = self.agent_executor.invoke({"input": query})
-        return response.get("output", "I could not generate a response.")
+        result = self.agent.invoke({"messages": [HumanMessage(content=query)]})
+        
+        messages = result.get("messages", [])
+        if messages:
+            last_msg = messages[-1]
+            if hasattr(last_msg, "content"):
+                return last_msg.content
+        
+        return "I could not generate a response."
+
+

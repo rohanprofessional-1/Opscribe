@@ -7,7 +7,7 @@ def get_iam_compliance_tool(session: Session, tenant_id: UUID) -> BaseTool:
     Queries the Opscribe database/RAG graph to check for overly permissive IAM roles.
     """
     
-    @tool(name="check_iam_compliance", return_direct=False)
+    @tool("check_iam_compliance", return_direct=False)
     def check_iam_compliance(service_filter: str = "ALL") -> str:
         """
         Scans current infrastructure graph for IAM roles and evaluates them

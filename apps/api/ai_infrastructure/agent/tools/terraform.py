@@ -6,7 +6,7 @@ def get_terraform_generator_tool() -> BaseTool:
     Tool that generates a .tf file and (eventually) commits it to the user's Github.
     """
     
-    @tool(name="generate_terraform_file", return_direct=True)
+    @tool("generate_terraform_file", return_direct=True)
     def generate_terraform_file(resource_type: str, resource_name: str, hcl_code: str, file_name: str) -> str:
         """
         Generates a HashiCorp Configuration Language (.tf) file for a specified resource.
