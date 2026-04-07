@@ -1,0 +1,181 @@
+{
+  "nodes": [
+    {
+      "key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "display_name": "opscribeTestEdge",
+      "node_type": "compute",
+      "node_subtype": "compute/function",
+      "properties": {
+        "runtime": "nodejs24.x",
+        "handler": "index.handler",
+        "memory_size": 128,
+        "timeout": 3,
+        "vpc_id": null,
+        "subnet_ids": [],
+        "security_group_ids": [],
+        "role_arn": "arn:aws:iam::580983240396:role/service-role/opscribeTestEdge-role-pbmve2p6",
+        "description": "",
+        "last_modified": "2026-04-03T04:43:49.807+0000",
+        "layers": [],
+        "environment": {}
+      },
+      "source_metadata": {
+        "arn": "arn:aws:lambda:us-east-2:580983240396:function:opscribeTestEdge",
+        "resource_id": "opscribeTestEdge",
+        "name_tag": "opscribeTestEdge"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForResourceExplorer",
+      "display_name": "AWSServiceRoleForResourceExplorer",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForResourceExplorer",
+        "created_date": "2026-03-04T02:49:37+00:00",
+        "path": "/aws-service-role/resource-explorer-2.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer",
+        "resource_id": "AWSServiceRoleForResourceExplorer",
+        "name_tag": "AWSServiceRoleForResourceExplorer"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForSupport",
+      "display_name": "AWSServiceRoleForSupport",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForSupport",
+        "created_date": "2026-03-04T02:37:46+00:00",
+        "path": "/aws-service-role/support.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+        "resource_id": "AWSServiceRoleForSupport",
+        "name_tag": "AWSServiceRoleForSupport"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForTrustedAdvisor",
+      "display_name": "AWSServiceRoleForTrustedAdvisor",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForTrustedAdvisor",
+        "created_date": "2026-03-04T02:37:46+00:00",
+        "path": "/aws-service-role/trustedadvisor.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor",
+        "resource_id": "AWSServiceRoleForTrustedAdvisor",
+        "name_tag": "AWSServiceRoleForTrustedAdvisor"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/OpscribeTestAccount",
+      "display_name": "OpscribeTestAccount",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "OpscribeTestAccount",
+        "created_date": "2026-03-25T03:11:55+00:00",
+        "path": "/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/OpscribeTestAccount",
+        "resource_id": "OpscribeTestAccount",
+        "name_tag": "OpscribeTestAccount"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/opscribeTestEdge-role-pbmve2p6",
+      "display_name": "opscribeTestEdge-role-pbmve2p6",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "opscribeTestEdge-role-pbmve2p6",
+        "created_date": "2026-04-03T04:43:33+00:00",
+        "path": "/service-role/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/service-role/opscribeTestEdge-role-pbmve2p6",
+        "resource_id": "opscribeTestEdge-role-pbmve2p6",
+        "name_tag": "opscribeTestEdge-role-pbmve2p6"
+      }
+    },
+    {
+      "key": "aws::us-east-2::s3::opscribe-client-s3-bucket",
+      "display_name": "opscribe-client-s3-bucket",
+      "node_type": "storage",
+      "node_subtype": "storage/bucket",
+      "properties": {
+        "bucket_name": "opscribe-client-s3-bucket",
+        "creation_date": "2026-03-14T04:17:40+00:00",
+        "location": "us-east-2",
+        "lambda_triggers": [
+          "arn:aws:lambda:us-east-2:580983240396:function:opscribeTestEdge"
+        ]
+      },
+      "source_metadata": {
+        "arn": "arn:aws:s3:::opscribe-client-s3-bucket",
+        "resource_id": "opscribe-client-s3-bucket",
+        "name_tag": "opscribe-client-s3-bucket"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from_node_key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "to_node_key": "aws::global::iam::role/opscribeTestEdge-role-pbmve2p6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::s3::opscribe-client-s3-bucket",
+      "to_node_key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::s3::opscribe-client-s3-bucket",
+      "to_node_key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "edge_type": "triggers",
+      "direction": "outbound",
+      "properties": {
+        "trigger_type": "s3_notification"
+      }
+    }
+  ],
+  "metadata": {
+    "timestamp": "2026-04-05T02:53:13.936662",
+    "source": "aws",
+    "regions_scanned": [
+      "ca-central-1",
+      "eu-west-3",
+      "ap-northeast-3",
+      "ap-northeast-2",
+      "us-west-1",
+      "us-west-2",
+      "eu-north-1",
+      "ap-south-1",
+      "us-east-2",
+      "us-east-1",
+      "ap-southeast-1",
+      "eu-central-1",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-2",
+      "eu-west-2",
+      "sa-east-1"
+    ]
+  }
+}

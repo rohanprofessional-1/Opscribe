@@ -30,7 +30,6 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
 
     // AWS State
     const [authMethod, setAuthMethod] = useState<"role" | "keys">("role");
-    const [awsRegion, setAwsRegion] = useState("us-east-1");
     const [roleArn, setRoleArn] = useState("");
     const [externalId, setExternalId] = useState("");
     const [awsAccessKey, setAwsAccessKey] = useState("");
@@ -134,7 +133,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
         setIsSaving(true);
         setAwsStatus(null);
         try {
-            const credentialsPayload: any = { region: awsRegion };
+            const credentialsPayload: any = {};
             if (authMethod === "role" && roleArn) {
                 credentialsPayload.role_arn = roleArn;
                 if (externalId) credentialsPayload.external_id = externalId;
@@ -162,8 +161,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                 body: JSON.stringify({
                     client_id: clientId,
                     include_aws: true,
-                    include_github: false,
-                    aws_region: awsRegion
+                    include_github: false
                 })
             });
 
@@ -307,9 +305,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs text-gray-500 mb-1">Default AWS Region</label>
-                                    <input type="text" value={awsRegion} onChange={e => setAwsRegion(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none" placeholder="us-east-1" />
-                                    <p className="mt-2 text-[10px] text-gray-500 italic">Sensitive fields (Keys, ARN) are encrypted. Leave them blank to maintain your current configuration.</p>
+                                    <p className="mt-2 text-[10px] text-gray-500 italic">Sensitive fields (Keys, ARN) are encrypted. Leave them blank to maintain your current configuration. Opscribe will automatically discover and scan all active regions worldwide.</p>
                                 </div>
                             </div>
                             <hr className="border-gray-800" />

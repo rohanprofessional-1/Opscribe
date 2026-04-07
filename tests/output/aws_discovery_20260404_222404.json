@@ -1,0 +1,2322 @@
+{
+  "nodes": [
+    {
+      "key": "aws::ap-south-1::vpc::vpc-05aef0edb69655f25",
+      "display_name": "vpc-05aef0edb69655f25",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-05aef0edb69655f25",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-south-1:580983240396:vpc/vpc-05aef0edb69655f25",
+        "resource_id": "vpc-05aef0edb69655f25",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-south-1::subnet::subnet-0a7ebadf7181c8958",
+      "display_name": "subnet-0a7ebadf7181c8958",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0a7ebadf7181c8958",
+        "vpc_id": "vpc-05aef0edb69655f25",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-south-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-south-1:580983240396:subnet/subnet-0a7ebadf7181c8958",
+        "resource_id": "subnet-0a7ebadf7181c8958",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-south-1::subnet::subnet-0e26be9aea79c6020",
+      "display_name": "subnet-0e26be9aea79c6020",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0e26be9aea79c6020",
+        "vpc_id": "vpc-05aef0edb69655f25",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-south-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-south-1:580983240396:subnet/subnet-0e26be9aea79c6020",
+        "resource_id": "subnet-0e26be9aea79c6020",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-south-1::subnet::subnet-04c6104b3f979eec2",
+      "display_name": "subnet-04c6104b3f979eec2",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-04c6104b3f979eec2",
+        "vpc_id": "vpc-05aef0edb69655f25",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-south-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-south-1:580983240396:subnet/subnet-04c6104b3f979eec2",
+        "resource_id": "subnet-04c6104b3f979eec2",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-south-1::sg::sg-09a6c3b256f2083a2",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-09a6c3b256f2083a2",
+        "group_name": "default",
+        "vpc_id": "vpc-05aef0edb69655f25",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-south-1:580983240396:security-group/sg-09a6c3b256f2083a2",
+        "resource_id": "sg-09a6c3b256f2083a2",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::eu-north-1::vpc::vpc-0a80981294acbfd0f",
+      "display_name": "vpc-0a80981294acbfd0f",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0a80981294acbfd0f",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-north-1:580983240396:vpc/vpc-0a80981294acbfd0f",
+        "resource_id": "vpc-0a80981294acbfd0f",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-north-1::subnet::subnet-0ce15e6b32162294c",
+      "display_name": "subnet-0ce15e6b32162294c",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0ce15e6b32162294c",
+        "vpc_id": "vpc-0a80981294acbfd0f",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "eu-north-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-north-1:580983240396:subnet/subnet-0ce15e6b32162294c",
+        "resource_id": "subnet-0ce15e6b32162294c",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-north-1::subnet::subnet-05337dd20218a56ed",
+      "display_name": "subnet-05337dd20218a56ed",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-05337dd20218a56ed",
+        "vpc_id": "vpc-0a80981294acbfd0f",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "eu-north-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-north-1:580983240396:subnet/subnet-05337dd20218a56ed",
+        "resource_id": "subnet-05337dd20218a56ed",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-north-1::subnet::subnet-01b6b476404d5bd04",
+      "display_name": "subnet-01b6b476404d5bd04",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-01b6b476404d5bd04",
+        "vpc_id": "vpc-0a80981294acbfd0f",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "eu-north-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-north-1:580983240396:subnet/subnet-01b6b476404d5bd04",
+        "resource_id": "subnet-01b6b476404d5bd04",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-north-1::sg::sg-007f41c2554752ad0",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-007f41c2554752ad0",
+        "group_name": "default",
+        "vpc_id": "vpc-0a80981294acbfd0f",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-north-1:580983240396:security-group/sg-007f41c2554752ad0",
+        "resource_id": "sg-007f41c2554752ad0",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::eu-west-3::vpc::vpc-0eac578830aa4c670",
+      "display_name": "vpc-0eac578830aa4c670",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0eac578830aa4c670",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-3:580983240396:vpc/vpc-0eac578830aa4c670",
+        "resource_id": "vpc-0eac578830aa4c670",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-3::subnet::subnet-00a05edd205c1b393",
+      "display_name": "subnet-00a05edd205c1b393",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-00a05edd205c1b393",
+        "vpc_id": "vpc-0eac578830aa4c670",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "eu-west-3c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-3:580983240396:subnet/subnet-00a05edd205c1b393",
+        "resource_id": "subnet-00a05edd205c1b393",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-3::subnet::subnet-025d9174729cb3071",
+      "display_name": "subnet-025d9174729cb3071",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-025d9174729cb3071",
+        "vpc_id": "vpc-0eac578830aa4c670",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "eu-west-3a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-3:580983240396:subnet/subnet-025d9174729cb3071",
+        "resource_id": "subnet-025d9174729cb3071",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-3::subnet::subnet-0930854e08ccced40",
+      "display_name": "subnet-0930854e08ccced40",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0930854e08ccced40",
+        "vpc_id": "vpc-0eac578830aa4c670",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "eu-west-3b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-3:580983240396:subnet/subnet-0930854e08ccced40",
+        "resource_id": "subnet-0930854e08ccced40",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-3::sg::sg-06fed6eed7cf1d5b4",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-06fed6eed7cf1d5b4",
+        "group_name": "default",
+        "vpc_id": "vpc-0eac578830aa4c670",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-3:580983240396:security-group/sg-06fed6eed7cf1d5b4",
+        "resource_id": "sg-06fed6eed7cf1d5b4",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::eu-west-2::vpc::vpc-09f061ac70971fbfc",
+      "display_name": "vpc-09f061ac70971fbfc",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-09f061ac70971fbfc",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-2:580983240396:vpc/vpc-09f061ac70971fbfc",
+        "resource_id": "vpc-09f061ac70971fbfc",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-2::subnet::subnet-0f862f028370c4c3c",
+      "display_name": "subnet-0f862f028370c4c3c",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0f862f028370c4c3c",
+        "vpc_id": "vpc-09f061ac70971fbfc",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "eu-west-2a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-2:580983240396:subnet/subnet-0f862f028370c4c3c",
+        "resource_id": "subnet-0f862f028370c4c3c",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-2::subnet::subnet-032e11d9edd264e5e",
+      "display_name": "subnet-032e11d9edd264e5e",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-032e11d9edd264e5e",
+        "vpc_id": "vpc-09f061ac70971fbfc",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "eu-west-2b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-2:580983240396:subnet/subnet-032e11d9edd264e5e",
+        "resource_id": "subnet-032e11d9edd264e5e",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-2::subnet::subnet-01b415c0d96c55b71",
+      "display_name": "subnet-01b415c0d96c55b71",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-01b415c0d96c55b71",
+        "vpc_id": "vpc-09f061ac70971fbfc",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "eu-west-2c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-2:580983240396:subnet/subnet-01b415c0d96c55b71",
+        "resource_id": "subnet-01b415c0d96c55b71",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-2::sg::sg-016e56200600a1eb5",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-016e56200600a1eb5",
+        "group_name": "default",
+        "vpc_id": "vpc-09f061ac70971fbfc",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-2:580983240396:security-group/sg-016e56200600a1eb5",
+        "resource_id": "sg-016e56200600a1eb5",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::eu-west-1::vpc::vpc-05c280cb87ce70ad4",
+      "display_name": "vpc-05c280cb87ce70ad4",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-05c280cb87ce70ad4",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-1:580983240396:vpc/vpc-05c280cb87ce70ad4",
+        "resource_id": "vpc-05c280cb87ce70ad4",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-1::subnet::subnet-090f484df3c63a9d6",
+      "display_name": "subnet-090f484df3c63a9d6",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-090f484df3c63a9d6",
+        "vpc_id": "vpc-05c280cb87ce70ad4",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "eu-west-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-1:580983240396:subnet/subnet-090f484df3c63a9d6",
+        "resource_id": "subnet-090f484df3c63a9d6",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-1::subnet::subnet-0a9482343f4784707",
+      "display_name": "subnet-0a9482343f4784707",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0a9482343f4784707",
+        "vpc_id": "vpc-05c280cb87ce70ad4",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "eu-west-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-1:580983240396:subnet/subnet-0a9482343f4784707",
+        "resource_id": "subnet-0a9482343f4784707",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-1::subnet::subnet-02b20a8f116908faa",
+      "display_name": "subnet-02b20a8f116908faa",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-02b20a8f116908faa",
+        "vpc_id": "vpc-05c280cb87ce70ad4",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "eu-west-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-1:580983240396:subnet/subnet-02b20a8f116908faa",
+        "resource_id": "subnet-02b20a8f116908faa",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-west-1::sg::sg-0a03f14ba4bb6d580",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0a03f14ba4bb6d580",
+        "group_name": "default",
+        "vpc_id": "vpc-05c280cb87ce70ad4",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-west-1:580983240396:security-group/sg-0a03f14ba4bb6d580",
+        "resource_id": "sg-0a03f14ba4bb6d580",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ap-northeast-3::vpc::vpc-07fb451c058254786",
+      "display_name": "vpc-07fb451c058254786",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-07fb451c058254786",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-3:580983240396:vpc/vpc-07fb451c058254786",
+        "resource_id": "vpc-07fb451c058254786",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-3::subnet::subnet-0c8e496256ff4f98b",
+      "display_name": "subnet-0c8e496256ff4f98b",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0c8e496256ff4f98b",
+        "vpc_id": "vpc-07fb451c058254786",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-northeast-3c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-3:580983240396:subnet/subnet-0c8e496256ff4f98b",
+        "resource_id": "subnet-0c8e496256ff4f98b",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-3::subnet::subnet-04798ec7eccfdbe93",
+      "display_name": "subnet-04798ec7eccfdbe93",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-04798ec7eccfdbe93",
+        "vpc_id": "vpc-07fb451c058254786",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-northeast-3a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-3:580983240396:subnet/subnet-04798ec7eccfdbe93",
+        "resource_id": "subnet-04798ec7eccfdbe93",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-3::subnet::subnet-0e842bc493251ce80",
+      "display_name": "subnet-0e842bc493251ce80",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0e842bc493251ce80",
+        "vpc_id": "vpc-07fb451c058254786",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-northeast-3b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-3:580983240396:subnet/subnet-0e842bc493251ce80",
+        "resource_id": "subnet-0e842bc493251ce80",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-3::sg::sg-08c19b95dc7af9214",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-08c19b95dc7af9214",
+        "group_name": "default",
+        "vpc_id": "vpc-07fb451c058254786",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-3:580983240396:security-group/sg-08c19b95dc7af9214",
+        "resource_id": "sg-08c19b95dc7af9214",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "display_name": "vpc-0f69ba81e63c4c17b",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:vpc/vpc-0f69ba81e63c4c17b",
+        "resource_id": "vpc-0f69ba81e63c4c17b",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::subnet::subnet-092808ffc98e2cd49",
+      "display_name": "subnet-092808ffc98e2cd49",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-092808ffc98e2cd49",
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-northeast-2a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:subnet/subnet-092808ffc98e2cd49",
+        "resource_id": "subnet-092808ffc98e2cd49",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::subnet::subnet-0e87a46fe0795a406",
+      "display_name": "subnet-0e87a46fe0795a406",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0e87a46fe0795a406",
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-northeast-2b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:subnet/subnet-0e87a46fe0795a406",
+        "resource_id": "subnet-0e87a46fe0795a406",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::subnet::subnet-05f430bfc7ec4a459",
+      "display_name": "subnet-05f430bfc7ec4a459",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-05f430bfc7ec4a459",
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "cidr_block": "172.31.48.0/20",
+        "availability_zone": "ap-northeast-2d",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:subnet/subnet-05f430bfc7ec4a459",
+        "resource_id": "subnet-05f430bfc7ec4a459",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::subnet::subnet-0dcdb4c74a72f8fe6",
+      "display_name": "subnet-0dcdb4c74a72f8fe6",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0dcdb4c74a72f8fe6",
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-northeast-2c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:subnet/subnet-0dcdb4c74a72f8fe6",
+        "resource_id": "subnet-0dcdb4c74a72f8fe6",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-2::sg::sg-0194c2f56b4ef4735",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0194c2f56b4ef4735",
+        "group_name": "default",
+        "vpc_id": "vpc-0f69ba81e63c4c17b",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-2:580983240396:security-group/sg-0194c2f56b4ef4735",
+        "resource_id": "sg-0194c2f56b4ef4735",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ap-northeast-1::vpc::vpc-063cd1664fae49447",
+      "display_name": "vpc-063cd1664fae49447",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-063cd1664fae49447",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-1:580983240396:vpc/vpc-063cd1664fae49447",
+        "resource_id": "vpc-063cd1664fae49447",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-1::subnet::subnet-0f134914d61897228",
+      "display_name": "subnet-0f134914d61897228",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0f134914d61897228",
+        "vpc_id": "vpc-063cd1664fae49447",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-northeast-1d",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-1:580983240396:subnet/subnet-0f134914d61897228",
+        "resource_id": "subnet-0f134914d61897228",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-1::subnet::subnet-07aa0cb65315669cf",
+      "display_name": "subnet-07aa0cb65315669cf",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-07aa0cb65315669cf",
+        "vpc_id": "vpc-063cd1664fae49447",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-northeast-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-1:580983240396:subnet/subnet-07aa0cb65315669cf",
+        "resource_id": "subnet-07aa0cb65315669cf",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-1::subnet::subnet-0f310e9699674e53a",
+      "display_name": "subnet-0f310e9699674e53a",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0f310e9699674e53a",
+        "vpc_id": "vpc-063cd1664fae49447",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-northeast-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-1:580983240396:subnet/subnet-0f310e9699674e53a",
+        "resource_id": "subnet-0f310e9699674e53a",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-northeast-1::sg::sg-0d9199d67890293d6",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0d9199d67890293d6",
+        "group_name": "default",
+        "vpc_id": "vpc-063cd1664fae49447",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-northeast-1:580983240396:security-group/sg-0d9199d67890293d6",
+        "resource_id": "sg-0d9199d67890293d6",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ca-central-1::vpc::vpc-0a41ea198473b3c8c",
+      "display_name": "vpc-0a41ea198473b3c8c",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0a41ea198473b3c8c",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ca-central-1:580983240396:vpc/vpc-0a41ea198473b3c8c",
+        "resource_id": "vpc-0a41ea198473b3c8c",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ca-central-1::subnet::subnet-094914f71f15bff40",
+      "display_name": "subnet-094914f71f15bff40",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-094914f71f15bff40",
+        "vpc_id": "vpc-0a41ea198473b3c8c",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ca-central-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ca-central-1:580983240396:subnet/subnet-094914f71f15bff40",
+        "resource_id": "subnet-094914f71f15bff40",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ca-central-1::subnet::subnet-0426ea493409357b5",
+      "display_name": "subnet-0426ea493409357b5",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0426ea493409357b5",
+        "vpc_id": "vpc-0a41ea198473b3c8c",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ca-central-1d",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ca-central-1:580983240396:subnet/subnet-0426ea493409357b5",
+        "resource_id": "subnet-0426ea493409357b5",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ca-central-1::subnet::subnet-058b33998bfc244e1",
+      "display_name": "subnet-058b33998bfc244e1",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-058b33998bfc244e1",
+        "vpc_id": "vpc-0a41ea198473b3c8c",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ca-central-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ca-central-1:580983240396:subnet/subnet-058b33998bfc244e1",
+        "resource_id": "subnet-058b33998bfc244e1",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ca-central-1::sg::sg-07a8a75d04eb8fadb",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-07a8a75d04eb8fadb",
+        "group_name": "default",
+        "vpc_id": "vpc-0a41ea198473b3c8c",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ca-central-1:580983240396:security-group/sg-07a8a75d04eb8fadb",
+        "resource_id": "sg-07a8a75d04eb8fadb",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::sa-east-1::vpc::vpc-0b0368086abc0877d",
+      "display_name": "vpc-0b0368086abc0877d",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0b0368086abc0877d",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:sa-east-1:580983240396:vpc/vpc-0b0368086abc0877d",
+        "resource_id": "vpc-0b0368086abc0877d",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::sa-east-1::subnet::subnet-017bcea414132d3be",
+      "display_name": "subnet-017bcea414132d3be",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-017bcea414132d3be",
+        "vpc_id": "vpc-0b0368086abc0877d",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "sa-east-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:sa-east-1:580983240396:subnet/subnet-017bcea414132d3be",
+        "resource_id": "subnet-017bcea414132d3be",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::sa-east-1::subnet::subnet-0b4033668b5fabbd0",
+      "display_name": "subnet-0b4033668b5fabbd0",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0b4033668b5fabbd0",
+        "vpc_id": "vpc-0b0368086abc0877d",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "sa-east-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:sa-east-1:580983240396:subnet/subnet-0b4033668b5fabbd0",
+        "resource_id": "subnet-0b4033668b5fabbd0",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::sa-east-1::subnet::subnet-030e1267e1a49c0a0",
+      "display_name": "subnet-030e1267e1a49c0a0",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-030e1267e1a49c0a0",
+        "vpc_id": "vpc-0b0368086abc0877d",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "sa-east-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:sa-east-1:580983240396:subnet/subnet-030e1267e1a49c0a0",
+        "resource_id": "subnet-030e1267e1a49c0a0",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::sa-east-1::sg::sg-0e2b6cc521f2e6ba8",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0e2b6cc521f2e6ba8",
+        "group_name": "default",
+        "vpc_id": "vpc-0b0368086abc0877d",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:sa-east-1:580983240396:security-group/sg-0e2b6cc521f2e6ba8",
+        "resource_id": "sg-0e2b6cc521f2e6ba8",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ap-southeast-1::vpc::vpc-0e835c3292e8788d0",
+      "display_name": "vpc-0e835c3292e8788d0",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0e835c3292e8788d0",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-1:580983240396:vpc/vpc-0e835c3292e8788d0",
+        "resource_id": "vpc-0e835c3292e8788d0",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-1::subnet::subnet-00769be2a25d70e9c",
+      "display_name": "subnet-00769be2a25d70e9c",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-00769be2a25d70e9c",
+        "vpc_id": "vpc-0e835c3292e8788d0",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-southeast-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-1:580983240396:subnet/subnet-00769be2a25d70e9c",
+        "resource_id": "subnet-00769be2a25d70e9c",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-1::subnet::subnet-050e32cccce021b94",
+      "display_name": "subnet-050e32cccce021b94",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-050e32cccce021b94",
+        "vpc_id": "vpc-0e835c3292e8788d0",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-southeast-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-1:580983240396:subnet/subnet-050e32cccce021b94",
+        "resource_id": "subnet-050e32cccce021b94",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-1::subnet::subnet-0c39a3709c946a7e6",
+      "display_name": "subnet-0c39a3709c946a7e6",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0c39a3709c946a7e6",
+        "vpc_id": "vpc-0e835c3292e8788d0",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-southeast-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-1:580983240396:subnet/subnet-0c39a3709c946a7e6",
+        "resource_id": "subnet-0c39a3709c946a7e6",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-1::sg::sg-0fe56467b7467ad57",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0fe56467b7467ad57",
+        "group_name": "default",
+        "vpc_id": "vpc-0e835c3292e8788d0",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-1:580983240396:security-group/sg-0fe56467b7467ad57",
+        "resource_id": "sg-0fe56467b7467ad57",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::ap-southeast-2::vpc::vpc-0bf44b0197702ebb6",
+      "display_name": "vpc-0bf44b0197702ebb6",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0bf44b0197702ebb6",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-2:580983240396:vpc/vpc-0bf44b0197702ebb6",
+        "resource_id": "vpc-0bf44b0197702ebb6",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-2::subnet::subnet-0c868d6eab3304e48",
+      "display_name": "subnet-0c868d6eab3304e48",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0c868d6eab3304e48",
+        "vpc_id": "vpc-0bf44b0197702ebb6",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "ap-southeast-2a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-2:580983240396:subnet/subnet-0c868d6eab3304e48",
+        "resource_id": "subnet-0c868d6eab3304e48",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-2::subnet::subnet-0fde98b82b8ec69ac",
+      "display_name": "subnet-0fde98b82b8ec69ac",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0fde98b82b8ec69ac",
+        "vpc_id": "vpc-0bf44b0197702ebb6",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "ap-southeast-2c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-2:580983240396:subnet/subnet-0fde98b82b8ec69ac",
+        "resource_id": "subnet-0fde98b82b8ec69ac",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-2::subnet::subnet-0a4949de3dc40b515",
+      "display_name": "subnet-0a4949de3dc40b515",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0a4949de3dc40b515",
+        "vpc_id": "vpc-0bf44b0197702ebb6",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "ap-southeast-2b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-2:580983240396:subnet/subnet-0a4949de3dc40b515",
+        "resource_id": "subnet-0a4949de3dc40b515",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::ap-southeast-2::sg::sg-07b21a249200d2ed4",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-07b21a249200d2ed4",
+        "group_name": "default",
+        "vpc_id": "vpc-0bf44b0197702ebb6",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:ap-southeast-2:580983240396:security-group/sg-07b21a249200d2ed4",
+        "resource_id": "sg-07b21a249200d2ed4",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::eu-central-1::vpc::vpc-03f94cd4b3ac94bff",
+      "display_name": "vpc-03f94cd4b3ac94bff",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-03f94cd4b3ac94bff",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-central-1:580983240396:vpc/vpc-03f94cd4b3ac94bff",
+        "resource_id": "vpc-03f94cd4b3ac94bff",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-central-1::subnet::subnet-05d4e1bd647f6fbb5",
+      "display_name": "subnet-05d4e1bd647f6fbb5",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-05d4e1bd647f6fbb5",
+        "vpc_id": "vpc-03f94cd4b3ac94bff",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "eu-central-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-central-1:580983240396:subnet/subnet-05d4e1bd647f6fbb5",
+        "resource_id": "subnet-05d4e1bd647f6fbb5",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-central-1::subnet::subnet-0c65b57262353e563",
+      "display_name": "subnet-0c65b57262353e563",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0c65b57262353e563",
+        "vpc_id": "vpc-03f94cd4b3ac94bff",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "eu-central-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-central-1:580983240396:subnet/subnet-0c65b57262353e563",
+        "resource_id": "subnet-0c65b57262353e563",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-central-1::subnet::subnet-00e622cbdbec960ab",
+      "display_name": "subnet-00e622cbdbec960ab",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-00e622cbdbec960ab",
+        "vpc_id": "vpc-03f94cd4b3ac94bff",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "eu-central-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-central-1:580983240396:subnet/subnet-00e622cbdbec960ab",
+        "resource_id": "subnet-00e622cbdbec960ab",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::eu-central-1::sg::sg-0894107e874d35ffa",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0894107e874d35ffa",
+        "group_name": "default",
+        "vpc_id": "vpc-03f94cd4b3ac94bff",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:eu-central-1:580983240396:security-group/sg-0894107e874d35ffa",
+        "resource_id": "sg-0894107e874d35ffa",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "display_name": "vpc-02be6e22e7c7e29fa",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:vpc/vpc-02be6e22e7c7e29fa",
+        "resource_id": "vpc-02be6e22e7c7e29fa",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-0f19c3bc1e09751ed",
+      "display_name": "subnet-0f19c3bc1e09751ed",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0f19c3bc1e09751ed",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "us-east-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-0f19c3bc1e09751ed",
+        "resource_id": "subnet-0f19c3bc1e09751ed",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-04f0bd7a7e7aa49ac",
+      "display_name": "subnet-04f0bd7a7e7aa49ac",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-04f0bd7a7e7aa49ac",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.80.0/20",
+        "availability_zone": "us-east-1b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-04f0bd7a7e7aa49ac",
+        "resource_id": "subnet-04f0bd7a7e7aa49ac",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-0e71661c653d8e808",
+      "display_name": "subnet-0e71661c653d8e808",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0e71661c653d8e808",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.48.0/20",
+        "availability_zone": "us-east-1e",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-0e71661c653d8e808",
+        "resource_id": "subnet-0e71661c653d8e808",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-01ecaa46436319e32",
+      "display_name": "subnet-01ecaa46436319e32",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-01ecaa46436319e32",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "us-east-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-01ecaa46436319e32",
+        "resource_id": "subnet-01ecaa46436319e32",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-019a6f8401dd0ad2b",
+      "display_name": "subnet-019a6f8401dd0ad2b",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-019a6f8401dd0ad2b",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.64.0/20",
+        "availability_zone": "us-east-1f",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-019a6f8401dd0ad2b",
+        "resource_id": "subnet-019a6f8401dd0ad2b",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::subnet::subnet-01c53ac00e3544ab0",
+      "display_name": "subnet-01c53ac00e3544ab0",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-01c53ac00e3544ab0",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "us-east-1d",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:subnet/subnet-01c53ac00e3544ab0",
+        "resource_id": "subnet-01c53ac00e3544ab0",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-1::sg::sg-0a77b909a90ab05e9",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0a77b909a90ab05e9",
+        "group_name": "default",
+        "vpc_id": "vpc-02be6e22e7c7e29fa",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-1:580983240396:security-group/sg-0a77b909a90ab05e9",
+        "resource_id": "sg-0a77b909a90ab05e9",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "display_name": "opscribeTestEdge",
+      "node_type": "compute",
+      "node_subtype": "compute/function",
+      "properties": {
+        "runtime": "nodejs24.x",
+        "handler": "index.handler",
+        "memory_size": 128,
+        "timeout": 3,
+        "vpc_id": null,
+        "subnet_ids": [],
+        "security_group_ids": [],
+        "role_arn": "arn:aws:iam::580983240396:role/service-role/opscribeTestEdge-role-pbmve2p6",
+        "description": "",
+        "last_modified": "2026-04-03T04:43:49.807+0000",
+        "layers": []
+      },
+      "source_metadata": {
+        "arn": "arn:aws:lambda:us-east-2:580983240396:function:opscribeTestEdge",
+        "resource_id": "opscribeTestEdge",
+        "name_tag": "opscribeTestEdge"
+      }
+    },
+    {
+      "key": "aws::us-east-2::vpc::vpc-0af35bf4710de3294",
+      "display_name": "vpc-0af35bf4710de3294",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0af35bf4710de3294",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-2:580983240396:vpc/vpc-0af35bf4710de3294",
+        "resource_id": "vpc-0af35bf4710de3294",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-2::subnet::subnet-006f21ea7e4de6e6d",
+      "display_name": "subnet-006f21ea7e4de6e6d",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-006f21ea7e4de6e6d",
+        "vpc_id": "vpc-0af35bf4710de3294",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "us-east-2c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-2:580983240396:subnet/subnet-006f21ea7e4de6e6d",
+        "resource_id": "subnet-006f21ea7e4de6e6d",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-2::subnet::subnet-0d468895c5d2c1715",
+      "display_name": "subnet-0d468895c5d2c1715",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0d468895c5d2c1715",
+        "vpc_id": "vpc-0af35bf4710de3294",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "us-east-2b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-2:580983240396:subnet/subnet-0d468895c5d2c1715",
+        "resource_id": "subnet-0d468895c5d2c1715",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-2::subnet::subnet-0ba549d8d71d38a04",
+      "display_name": "subnet-0ba549d8d71d38a04",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0ba549d8d71d38a04",
+        "vpc_id": "vpc-0af35bf4710de3294",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "us-east-2a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-2:580983240396:subnet/subnet-0ba549d8d71d38a04",
+        "resource_id": "subnet-0ba549d8d71d38a04",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-east-2::sg::sg-01aeec8af760152a2",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-01aeec8af760152a2",
+        "group_name": "default",
+        "vpc_id": "vpc-0af35bf4710de3294",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-east-2:580983240396:security-group/sg-01aeec8af760152a2",
+        "resource_id": "sg-01aeec8af760152a2",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::us-west-1::vpc::vpc-0e728e370670d5af9",
+      "display_name": "vpc-0e728e370670d5af9",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-0e728e370670d5af9",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-1:580983240396:vpc/vpc-0e728e370670d5af9",
+        "resource_id": "vpc-0e728e370670d5af9",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-1::subnet::subnet-0f8486cc89938ccd4",
+      "display_name": "subnet-0f8486cc89938ccd4",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0f8486cc89938ccd4",
+        "vpc_id": "vpc-0e728e370670d5af9",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "us-west-1a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-1:580983240396:subnet/subnet-0f8486cc89938ccd4",
+        "resource_id": "subnet-0f8486cc89938ccd4",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-1::subnet::subnet-01a35707e9aefc247",
+      "display_name": "subnet-01a35707e9aefc247",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-01a35707e9aefc247",
+        "vpc_id": "vpc-0e728e370670d5af9",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "us-west-1c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-1:580983240396:subnet/subnet-01a35707e9aefc247",
+        "resource_id": "subnet-01a35707e9aefc247",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-1::sg::sg-0486e1da706c319e7",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-0486e1da706c319e7",
+        "group_name": "default",
+        "vpc_id": "vpc-0e728e370670d5af9",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-1:580983240396:security-group/sg-0486e1da706c319e7",
+        "resource_id": "sg-0486e1da706c319e7",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "display_name": "vpc-05746aa5cb4a31105",
+      "node_type": "network",
+      "node_subtype": "network/vpc",
+      "properties": {
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "cidr_block": "172.31.0.0/16",
+        "state": "available",
+        "is_default": true
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:vpc/vpc-05746aa5cb4a31105",
+        "resource_id": "vpc-05746aa5cb4a31105",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-2::subnet::subnet-02ecaae269bd563f5",
+      "display_name": "subnet-02ecaae269bd563f5",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-02ecaae269bd563f5",
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "cidr_block": "172.31.16.0/20",
+        "availability_zone": "us-west-2b",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:subnet/subnet-02ecaae269bd563f5",
+        "resource_id": "subnet-02ecaae269bd563f5",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-2::subnet::subnet-0ad80f3b7c9e333a7",
+      "display_name": "subnet-0ad80f3b7c9e333a7",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0ad80f3b7c9e333a7",
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "cidr_block": "172.31.0.0/20",
+        "availability_zone": "us-west-2c",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:subnet/subnet-0ad80f3b7c9e333a7",
+        "resource_id": "subnet-0ad80f3b7c9e333a7",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-2::subnet::subnet-04a73fb2c9ea27267",
+      "display_name": "subnet-04a73fb2c9ea27267",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-04a73fb2c9ea27267",
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "cidr_block": "172.31.48.0/20",
+        "availability_zone": "us-west-2d",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:subnet/subnet-04a73fb2c9ea27267",
+        "resource_id": "subnet-04a73fb2c9ea27267",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-2::subnet::subnet-0af0842a832142523",
+      "display_name": "subnet-0af0842a832142523",
+      "node_type": "network",
+      "node_subtype": "network/subnet",
+      "properties": {
+        "subnet_id": "subnet-0af0842a832142523",
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "cidr_block": "172.31.32.0/20",
+        "availability_zone": "us-west-2a",
+        "state": "available",
+        "available_ips": 4091
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:subnet/subnet-0af0842a832142523",
+        "resource_id": "subnet-0af0842a832142523",
+        "name_tag": null
+      }
+    },
+    {
+      "key": "aws::us-west-2::sg::sg-00cf8b76ef44423d9",
+      "display_name": "default",
+      "node_type": "network",
+      "node_subtype": "network/security_group",
+      "properties": {
+        "group_id": "sg-00cf8b76ef44423d9",
+        "group_name": "default",
+        "vpc_id": "vpc-05746aa5cb4a31105",
+        "description": "default VPC security group",
+        "ingress_rule_count": 1,
+        "egress_rule_count": 1
+      },
+      "source_metadata": {
+        "arn": "arn:aws:ec2:us-west-2:580983240396:security-group/sg-00cf8b76ef44423d9",
+        "resource_id": "sg-00cf8b76ef44423d9",
+        "name_tag": "default"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForResourceExplorer",
+      "display_name": "AWSServiceRoleForResourceExplorer",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForResourceExplorer",
+        "created_date": "2026-03-04T02:49:37+00:00",
+        "path": "/aws-service-role/resource-explorer-2.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer",
+        "resource_id": "AWSServiceRoleForResourceExplorer",
+        "name_tag": "AWSServiceRoleForResourceExplorer"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForSupport",
+      "display_name": "AWSServiceRoleForSupport",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForSupport",
+        "created_date": "2026-03-04T02:37:46+00:00",
+        "path": "/aws-service-role/support.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+        "resource_id": "AWSServiceRoleForSupport",
+        "name_tag": "AWSServiceRoleForSupport"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/AWSServiceRoleForTrustedAdvisor",
+      "display_name": "AWSServiceRoleForTrustedAdvisor",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "AWSServiceRoleForTrustedAdvisor",
+        "created_date": "2026-03-04T02:37:46+00:00",
+        "path": "/aws-service-role/trustedadvisor.amazonaws.com/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor",
+        "resource_id": "AWSServiceRoleForTrustedAdvisor",
+        "name_tag": "AWSServiceRoleForTrustedAdvisor"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/OpscribeTestAccount",
+      "display_name": "OpscribeTestAccount",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "OpscribeTestAccount",
+        "created_date": "2026-03-25T03:11:55+00:00",
+        "path": "/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/OpscribeTestAccount",
+        "resource_id": "OpscribeTestAccount",
+        "name_tag": "OpscribeTestAccount"
+      }
+    },
+    {
+      "key": "aws::global::iam::role/opscribeTestEdge-role-pbmve2p6",
+      "display_name": "opscribeTestEdge-role-pbmve2p6",
+      "node_type": "security",
+      "node_subtype": "security/role",
+      "properties": {
+        "role_name": "opscribeTestEdge-role-pbmve2p6",
+        "created_date": "2026-04-03T04:43:33+00:00",
+        "path": "/service-role/",
+        "max_session_duration": 3600
+      },
+      "source_metadata": {
+        "arn": "arn:aws:iam::580983240396:role/service-role/opscribeTestEdge-role-pbmve2p6",
+        "resource_id": "opscribeTestEdge-role-pbmve2p6",
+        "name_tag": "opscribeTestEdge-role-pbmve2p6"
+      }
+    },
+    {
+      "key": "aws::us-east-2::s3::opscribe-client-s3-bucket",
+      "display_name": "opscribe-client-s3-bucket",
+      "node_type": "storage",
+      "node_subtype": "storage/bucket",
+      "properties": {
+        "bucket_name": "opscribe-client-s3-bucket",
+        "creation_date": "2026-03-14T04:17:40+00:00",
+        "location": "us-east-2"
+      },
+      "source_metadata": {
+        "arn": "arn:aws:s3:::opscribe-client-s3-bucket",
+        "resource_id": "opscribe-client-s3-bucket",
+        "name_tag": "opscribe-client-s3-bucket"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from_node_key": "aws::ap-south-1::subnet::subnet-0a7ebadf7181c8958",
+      "to_node_key": "aws::ap-south-1::vpc::vpc-05aef0edb69655f25",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-south-1::subnet::subnet-0e26be9aea79c6020",
+      "to_node_key": "aws::ap-south-1::vpc::vpc-05aef0edb69655f25",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-south-1::subnet::subnet-04c6104b3f979eec2",
+      "to_node_key": "aws::ap-south-1::vpc::vpc-05aef0edb69655f25",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-south-1::sg::sg-09a6c3b256f2083a2",
+      "to_node_key": "aws::ap-south-1::vpc::vpc-05aef0edb69655f25",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-north-1::subnet::subnet-0ce15e6b32162294c",
+      "to_node_key": "aws::eu-north-1::vpc::vpc-0a80981294acbfd0f",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-north-1::subnet::subnet-05337dd20218a56ed",
+      "to_node_key": "aws::eu-north-1::vpc::vpc-0a80981294acbfd0f",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-north-1::subnet::subnet-01b6b476404d5bd04",
+      "to_node_key": "aws::eu-north-1::vpc::vpc-0a80981294acbfd0f",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-north-1::sg::sg-007f41c2554752ad0",
+      "to_node_key": "aws::eu-north-1::vpc::vpc-0a80981294acbfd0f",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-3::subnet::subnet-00a05edd205c1b393",
+      "to_node_key": "aws::eu-west-3::vpc::vpc-0eac578830aa4c670",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-3::subnet::subnet-025d9174729cb3071",
+      "to_node_key": "aws::eu-west-3::vpc::vpc-0eac578830aa4c670",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-3::subnet::subnet-0930854e08ccced40",
+      "to_node_key": "aws::eu-west-3::vpc::vpc-0eac578830aa4c670",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-3::sg::sg-06fed6eed7cf1d5b4",
+      "to_node_key": "aws::eu-west-3::vpc::vpc-0eac578830aa4c670",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-2::subnet::subnet-0f862f028370c4c3c",
+      "to_node_key": "aws::eu-west-2::vpc::vpc-09f061ac70971fbfc",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-2::subnet::subnet-032e11d9edd264e5e",
+      "to_node_key": "aws::eu-west-2::vpc::vpc-09f061ac70971fbfc",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-2::subnet::subnet-01b415c0d96c55b71",
+      "to_node_key": "aws::eu-west-2::vpc::vpc-09f061ac70971fbfc",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-2::sg::sg-016e56200600a1eb5",
+      "to_node_key": "aws::eu-west-2::vpc::vpc-09f061ac70971fbfc",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-1::subnet::subnet-090f484df3c63a9d6",
+      "to_node_key": "aws::eu-west-1::vpc::vpc-05c280cb87ce70ad4",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-1::subnet::subnet-0a9482343f4784707",
+      "to_node_key": "aws::eu-west-1::vpc::vpc-05c280cb87ce70ad4",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-1::subnet::subnet-02b20a8f116908faa",
+      "to_node_key": "aws::eu-west-1::vpc::vpc-05c280cb87ce70ad4",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-west-1::sg::sg-0a03f14ba4bb6d580",
+      "to_node_key": "aws::eu-west-1::vpc::vpc-05c280cb87ce70ad4",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-3::subnet::subnet-0c8e496256ff4f98b",
+      "to_node_key": "aws::ap-northeast-3::vpc::vpc-07fb451c058254786",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-3::subnet::subnet-04798ec7eccfdbe93",
+      "to_node_key": "aws::ap-northeast-3::vpc::vpc-07fb451c058254786",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-3::subnet::subnet-0e842bc493251ce80",
+      "to_node_key": "aws::ap-northeast-3::vpc::vpc-07fb451c058254786",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-3::sg::sg-08c19b95dc7af9214",
+      "to_node_key": "aws::ap-northeast-3::vpc::vpc-07fb451c058254786",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-2::subnet::subnet-092808ffc98e2cd49",
+      "to_node_key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-2::subnet::subnet-0e87a46fe0795a406",
+      "to_node_key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-2::subnet::subnet-05f430bfc7ec4a459",
+      "to_node_key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-2::subnet::subnet-0dcdb4c74a72f8fe6",
+      "to_node_key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-2::sg::sg-0194c2f56b4ef4735",
+      "to_node_key": "aws::ap-northeast-2::vpc::vpc-0f69ba81e63c4c17b",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-1::subnet::subnet-0f134914d61897228",
+      "to_node_key": "aws::ap-northeast-1::vpc::vpc-063cd1664fae49447",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-1::subnet::subnet-07aa0cb65315669cf",
+      "to_node_key": "aws::ap-northeast-1::vpc::vpc-063cd1664fae49447",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-1::subnet::subnet-0f310e9699674e53a",
+      "to_node_key": "aws::ap-northeast-1::vpc::vpc-063cd1664fae49447",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-northeast-1::sg::sg-0d9199d67890293d6",
+      "to_node_key": "aws::ap-northeast-1::vpc::vpc-063cd1664fae49447",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ca-central-1::subnet::subnet-094914f71f15bff40",
+      "to_node_key": "aws::ca-central-1::vpc::vpc-0a41ea198473b3c8c",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ca-central-1::subnet::subnet-0426ea493409357b5",
+      "to_node_key": "aws::ca-central-1::vpc::vpc-0a41ea198473b3c8c",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ca-central-1::subnet::subnet-058b33998bfc244e1",
+      "to_node_key": "aws::ca-central-1::vpc::vpc-0a41ea198473b3c8c",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ca-central-1::sg::sg-07a8a75d04eb8fadb",
+      "to_node_key": "aws::ca-central-1::vpc::vpc-0a41ea198473b3c8c",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::sa-east-1::subnet::subnet-017bcea414132d3be",
+      "to_node_key": "aws::sa-east-1::vpc::vpc-0b0368086abc0877d",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::sa-east-1::subnet::subnet-0b4033668b5fabbd0",
+      "to_node_key": "aws::sa-east-1::vpc::vpc-0b0368086abc0877d",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::sa-east-1::subnet::subnet-030e1267e1a49c0a0",
+      "to_node_key": "aws::sa-east-1::vpc::vpc-0b0368086abc0877d",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::sa-east-1::sg::sg-0e2b6cc521f2e6ba8",
+      "to_node_key": "aws::sa-east-1::vpc::vpc-0b0368086abc0877d",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-1::subnet::subnet-00769be2a25d70e9c",
+      "to_node_key": "aws::ap-southeast-1::vpc::vpc-0e835c3292e8788d0",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-1::subnet::subnet-050e32cccce021b94",
+      "to_node_key": "aws::ap-southeast-1::vpc::vpc-0e835c3292e8788d0",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-1::subnet::subnet-0c39a3709c946a7e6",
+      "to_node_key": "aws::ap-southeast-1::vpc::vpc-0e835c3292e8788d0",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-1::sg::sg-0fe56467b7467ad57",
+      "to_node_key": "aws::ap-southeast-1::vpc::vpc-0e835c3292e8788d0",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-2::subnet::subnet-0c868d6eab3304e48",
+      "to_node_key": "aws::ap-southeast-2::vpc::vpc-0bf44b0197702ebb6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-2::subnet::subnet-0fde98b82b8ec69ac",
+      "to_node_key": "aws::ap-southeast-2::vpc::vpc-0bf44b0197702ebb6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-2::subnet::subnet-0a4949de3dc40b515",
+      "to_node_key": "aws::ap-southeast-2::vpc::vpc-0bf44b0197702ebb6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::ap-southeast-2::sg::sg-07b21a249200d2ed4",
+      "to_node_key": "aws::ap-southeast-2::vpc::vpc-0bf44b0197702ebb6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-central-1::subnet::subnet-05d4e1bd647f6fbb5",
+      "to_node_key": "aws::eu-central-1::vpc::vpc-03f94cd4b3ac94bff",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-central-1::subnet::subnet-0c65b57262353e563",
+      "to_node_key": "aws::eu-central-1::vpc::vpc-03f94cd4b3ac94bff",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-central-1::subnet::subnet-00e622cbdbec960ab",
+      "to_node_key": "aws::eu-central-1::vpc::vpc-03f94cd4b3ac94bff",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::eu-central-1::sg::sg-0894107e874d35ffa",
+      "to_node_key": "aws::eu-central-1::vpc::vpc-03f94cd4b3ac94bff",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-0f19c3bc1e09751ed",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-04f0bd7a7e7aa49ac",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-0e71661c653d8e808",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-01ecaa46436319e32",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-019a6f8401dd0ad2b",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::subnet::subnet-01c53ac00e3544ab0",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-1::sg::sg-0a77b909a90ab05e9",
+      "to_node_key": "aws::us-east-1::vpc::vpc-02be6e22e7c7e29fa",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::lambda::opscribeTestEdge",
+      "to_node_key": "aws::global::iam::role/opscribeTestEdge-role-pbmve2p6",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::subnet::subnet-006f21ea7e4de6e6d",
+      "to_node_key": "aws::us-east-2::vpc::vpc-0af35bf4710de3294",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::subnet::subnet-0d468895c5d2c1715",
+      "to_node_key": "aws::us-east-2::vpc::vpc-0af35bf4710de3294",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::subnet::subnet-0ba549d8d71d38a04",
+      "to_node_key": "aws::us-east-2::vpc::vpc-0af35bf4710de3294",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-east-2::sg::sg-01aeec8af760152a2",
+      "to_node_key": "aws::us-east-2::vpc::vpc-0af35bf4710de3294",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-1::subnet::subnet-0f8486cc89938ccd4",
+      "to_node_key": "aws::us-west-1::vpc::vpc-0e728e370670d5af9",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-1::subnet::subnet-01a35707e9aefc247",
+      "to_node_key": "aws::us-west-1::vpc::vpc-0e728e370670d5af9",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-1::sg::sg-0486e1da706c319e7",
+      "to_node_key": "aws::us-west-1::vpc::vpc-0e728e370670d5af9",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-2::subnet::subnet-02ecaae269bd563f5",
+      "to_node_key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-2::subnet::subnet-0ad80f3b7c9e333a7",
+      "to_node_key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-2::subnet::subnet-04a73fb2c9ea27267",
+      "to_node_key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-2::subnet::subnet-0af0842a832142523",
+      "to_node_key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    },
+    {
+      "from_node_key": "aws::us-west-2::sg::sg-00cf8b76ef44423d9",
+      "to_node_key": "aws::us-west-2::vpc::vpc-05746aa5cb4a31105",
+      "edge_type": "references",
+      "direction": "outbound",
+      "properties": {}
+    }
+  ],
+  "metadata": {
+    "timestamp": "2026-04-05T02:24:04.050902",
+    "source": "aws",
+    "regions_scanned": [
+      "ap-southeast-1",
+      "eu-central-1",
+      "eu-west-2",
+      "sa-east-1",
+      "ap-northeast-2",
+      "us-west-1",
+      "ap-south-1",
+      "ap-northeast-1",
+      "eu-north-1",
+      "ca-central-1",
+      "us-east-2",
+      "us-west-2",
+      "eu-west-3",
+      "ap-northeast-3",
+      "ap-southeast-2",
+      "us-east-1",
+      "eu-west-1"
+    ]
+  }
+}

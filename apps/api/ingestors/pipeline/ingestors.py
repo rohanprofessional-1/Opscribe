@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class AWSIngestor(BaseIngestor):
-    def __init__(self, region_name: str = "us-east-1", credentials: dict = None):
-        self.region_name = region_name
+    def __init__(self, region_name: str | None = "us-east-1", credentials: dict = None):
+        self.region_name = region_name or "us-east-1"
         self.credentials = credentials or {}
 
     @property

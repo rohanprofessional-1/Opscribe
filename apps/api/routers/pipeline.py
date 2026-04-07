@@ -30,7 +30,6 @@ class ExportRequest(BaseModel):
     client_id: str
     include_aws: bool = True
     include_github: bool = True
-    aws_region: str = "us-east-1"
 
 class GithubLinkRequest(BaseModel):
     client_id: UUID
@@ -91,7 +90,7 @@ async def trigger_export(
     ingestors: List[BaseIngestor] = []
     if request.include_aws:
         aws_creds = decrypt_dict(aws_integration.credentials, SENSITIVE_KEYS) if aws_integration else {}
-        ingestors.append(AWSIngestor(region_name=request.aws_region, credentials=aws_creds))
+        ingestors.append(AWSIngestor(region_name="us-east-1", credentials=aws_creds))
     
     if request.include_github:
         ingestors.append(GitHubIngestor(client_id=request.client_id, session=session))
