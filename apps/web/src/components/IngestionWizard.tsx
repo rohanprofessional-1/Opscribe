@@ -29,29 +29,31 @@ export default function IngestionWizard({ isOpen, onClose, clientId, onIngestion
     const [awsRegion, setAwsRegion] = useState("us-east-1");
     const [includeGithub, setIncludeGithub] = useState(true);
     const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
-    const [connectedRepos, setConnectedRepos] = useState<any[]>([]);
+    const [availableRepos, setAvailableRepos] = useState<any[]>([]);
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && clientId) {
-            fetchConnectedRepos();
+            fetchAvailableRepos();
         }
     }, [isOpen, clientId]);
 
-    const fetchConnectedRepos = async () => {
+    const fetchAvailableRepos = async () => {
         setLoadingRepos(true);
         try {
-            const res = await fetch(`${API_BASE}/github/connected-repos?client_id=${clientId}`);
+            // Fetch ALL authorized repositories from the GitHub App installation,
+            // not just the ones that have been "pre-connected" in Settings.
+            const res = await fetch(`${API_BASE}/github/repos?client_id=${clientId}`);
             if (res.ok) {
                 const data = await res.json();
-                setConnectedRepos(data);
+                setAvailableRepos(data);
                 // Auto-select all by default
-                setSelectedRepos(data.map((r: any) => r.repo_url));
+                setSelectedRepos(data.map((r: any) => `https://github.com/${r.name}`));
             }
         } catch (err) {
-            console.error("Failed to fetch connected repos", err);
+            console.error("Failed to fetch available repos", err);
         } finally {
             setLoadingRepos(false);
         }
@@ -77,7 +79,13 @@ export default function IngestionWizard({ isOpen, onClose, clientId, onIngestion
                     aws_region: awsRegion,
                     graph_name: graphName,
                     instructions: connectionInstructions,
-                    repositories: includeGithub ? selectedRepos : []
+                    repositories: includeGithub ? availableRepos
+                        .filter(r => selectedRepos.includes(`https://github.com/${r.name}`))
+                        .map(r => ({
+                            repo_url: `https://github.com/${r.name}`,
+                            target_repo_id: r.id.toString(),
+                            default_branch: r.default_branch
+                        })) : []
                 })
             });
 
@@ -256,29 +264,32 @@ export default function IngestionWizard({ isOpen, onClose, clientId, onIngestion
                                     {includeGithub && (
                                         <div className="pl-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
                                             {loadingRepos ? (
-                                                <p className="text-center py-4 text-xs text-gray-500 animate-pulse">Loading connected repositories...</p>
-                                            ) : connectedRepos.length === 0 ? (
+                                                <p className="text-center py-4 text-xs text-gray-500 animate-pulse">Loading available repositories...</p>
+                                            ) : availableRepos.length === 0 ? (
                                                 <div className="bg-gray-800/30 rounded-xl p-6 text-center border border-dashed border-gray-700">
-                                                    <p className="text-sm text-gray-500 mb-2">No connected repositories found.</p>
-                                                    <p className="text-xs text-gray-600">Connect repositories in Provider Settings first.</p>
+                                                    <p className="text-sm text-gray-500 mb-2">No repositories found.</p>
+                                                    <p className="text-xs text-gray-600">Ensure the Opscribe GitHub App is installed in Provider Settings.</p>
                                                 </div>
                                             ) : (
                                                 <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                                    {connectedRepos.map(repo => (
-                                                        <button 
-                                                            key={repo.id}
-                                                            onClick={() => toggleRepo(repo.repo_url)}
-                                                            className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${selectedRepos.includes(repo.repo_url) ? 'bg-white/5 border-white/20' : 'bg-transparent border-transparent opacity-50 hover:opacity-80'}`}
-                                                        >
-                                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedRepos.includes(repo.repo_url) ? 'bg-blue-500 border-blue-500' : 'border-gray-600'}`}>
-                                                                {selectedRepos.includes(repo.repo_url) && <CheckCircle className="w-3 h-3 text-white" />}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-sm font-medium text-gray-200 truncate">{repo.repo_url.split('github.com/')[1]}</p>
-                                                                <p className="text-[10px] text-gray-500 uppercase tracking-wider">{repo.default_branch}</p>
-                                                            </div>
-                                                        </button>
-                                                    ))}
+                                                    {availableRepos.map(repo => {
+                                                        const repoUrl = `https://github.com/${repo.name}`;
+                                                        return (
+                                                            <button 
+                                                                key={repo.id}
+                                                                onClick={() => toggleRepo(repoUrl)}
+                                                                className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${selectedRepos.includes(repoUrl) ? 'bg-white/5 border-white/20' : 'bg-transparent border-transparent opacity-50 hover:opacity-80'}`}
+                                                            >
+                                                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedRepos.includes(repoUrl) ? 'bg-blue-500 border-blue-500' : 'border-gray-600'}`}>
+                                                                    {selectedRepos.includes(repoUrl) && <CheckCircle className="w-3 h-3 text-white" />}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-medium text-gray-200 truncate">{repo.name}</p>
+                                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{repo.default_branch}</p>
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
                                         </div>
