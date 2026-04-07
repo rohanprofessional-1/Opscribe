@@ -28,6 +28,10 @@ function App() {
     }
   }, [isAuthenticated, isLoading, getAccessTokenSilently]);
 
+  const [view, setView] = useState<View>("dashboard");
+  const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
+  const [createPending, setCreatePending] = useState(false);
+
   const {
     designs,
     loading: designsLoading,
@@ -36,11 +40,7 @@ function App() {
     updateDesign,
     deleteDesign,
     getDesign,
-  } = useInfrastructureDesigns(tokenReady);
-
-  const [view, setView] = useState<View>("dashboard");
-  const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
-  const [createPending, setCreatePending] = useState(false);
+  } = useInfrastructureDesigns(tokenReady, view === "dashboard");
 
   const handleCreateNew = useCallback(() => {
     setCreatePending(true);

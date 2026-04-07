@@ -17,16 +17,27 @@ function graphToDesign(g: {
   };
 }
 
-export function useInfrastructureDesigns(tokenReady: boolean) {
+export function useInfrastructureDesigns(tokenReady: boolean, pollingEnabled = false) {
   const [clientId, setClientId] = useState<string | null>(null);
   const [designs, setDesigns] = useState<InfrastructureDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchDesigns = useCallback(async (cId: string) => {
+    try {
+      const graphs = await api.listGraphs(cId);
+      if (graphs) {
+        setDesigns(graphs.map(graphToDesign));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }, []);
+
   useEffect(() => {
     if (!tokenReady) return;
     let cancelled = false;
-    setLoading(true);
+    // Clear error synchronously
     setError(null);
     api
       .getCurrentUser()
@@ -49,6 +60,17 @@ export function useInfrastructureDesigns(tokenReady: boolean) {
       cancelled = true;
     };
   }, [tokenReady]);
+
+  // Polling effect
+  useEffect(() => {
+    if (!pollingEnabled || !clientId) return;
+    
+    const interval = setInterval(() => {
+      fetchDesigns(clientId);
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [pollingEnabled, clientId, fetchDesigns]);
 
   const createDesignAsync = useCallback((): Promise<InfrastructureDesign> => {
     if (!clientId) return Promise.reject(new Error("Client not loaded"));

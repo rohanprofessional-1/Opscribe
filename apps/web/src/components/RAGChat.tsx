@@ -90,12 +90,12 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
     };
 
     return (
-        <div className="w-[400px] flex flex-col h-full bg-gray-900 text-gray-100 border-l border-gray-700">
+        <div className="w-80 flex flex-col h-full bg-gray-900 text-gray-100 border-l border-gray-700">
             <header className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/50">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-xl font-bold flex items-center gap-2">
-                        <Bot className="text-blue-400" /> AI Assistant
-                    </h1>
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <Bot className="text-blue-400 w-5 h-5" /> AI Assistant
+                    </h2>
                 </div>
                 <button
                     onClick={onClose}
@@ -112,7 +112,7 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
                 </div>
             )}
 
-            <main className="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full">
+            <main className="flex-1 overflow-y-auto p-4 space-y-6 w-full">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex gap-4 ${m.role === "bot" ? "" : "flex-row-reverse"}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === "bot" ? "bg-blue-900/50 text-blue-400" : "bg-gray-800 text-gray-400"}`}>
@@ -159,7 +159,7 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
             </main>
 
             <footer className="p-4 border-t border-gray-800 bg-gray-900/50">
-                <form onSubmit={handleQuery} className="max-w-4xl mx-auto relative">
+                <form onSubmit={handleQuery} className="relative">
                     <input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
