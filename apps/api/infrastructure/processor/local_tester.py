@@ -11,10 +11,9 @@ from apps.api.database import engine
 from apps.api.models import Node, Edge, NodeType, EdgeType, Graph
 from apps.api.infrastructure.processor.pipeline import InfrastructurePipeline
 
-GITHUB_FILE = "/Users/hardikk/Desktop/github_latest.json"
-AWS_FILE = "/Users/hardikk/Desktop/aws_latest.json"
-CLIENT_ID = "123e4567-e89b-12d3-a456-426614174000"
-GRAPH_ID = "0a1f13b0-aa75-44e2-82f5-dc418872a265"
+# File paths (default to same directory or project root)
+GITHUB_FILE = os.environ.get("GITHUB_FILE", "github_latest.json")
+AWS_FILE = os.environ.get("AWS_FILE", "aws_latest.json")
 
 def load_json(path):
     if not os.path.exists(path):

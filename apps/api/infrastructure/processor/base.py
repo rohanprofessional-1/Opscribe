@@ -16,12 +16,12 @@ class IRNode:
     display_name: str
     node_type: str # compute | storage | database | networking | security | messaging
     parent_id: Optional[str] = None
-    environment: str = "both" # "prod" | "dev" | "both"
     source: str = "inferred" # "aws" | "github" | "inferred"
     confidence: float = 1.0
     source_completeness: str = "full" # "full" | "partial" | "inferred"
     source_metadata: List[Dict[str, Any]] = field(default_factory=list)
     properties: Dict[str, Any] = field(default_factory=dict)
+    environment: str = "unknown" # e.g. "prod", "staging", "dev"
     validation_warnings: List[ValidationWarning] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -31,12 +31,12 @@ class IRNode:
             "display_name": self.display_name,
             "node_type": self.node_type,
             "parent_id": self.parent_id,
-            "environment": self.environment,
             "source": self.source,
             "confidence": self.confidence,
             "source_completeness": self.source_completeness,
             "source_metadata": self.source_metadata,
             "properties": self.properties,
+            "environment": self.environment,
             "validation_warnings": [asdict(w) for w in self.validation_warnings] if hasattr(self, 'validation_warnings') else []
         }
 
@@ -48,7 +48,7 @@ class IREdge:
     edge_type: str # "depends_on" | "accesses" | "mirrors" | "has_access_to" | "manages" | "routes_to" | "deploys_to"
     source: str # "aws" | "github" | "inferred"
     confidence: float
-    environment: str # "prod" | "dev" | "both"
+    environment: str = "unknown"
     properties: Dict[str, Any] = field(default_factory=dict)
 
 class ProcessingContext:

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Settings, Database, Github, CheckCircle, AlertCircle, Play, Copy, Check, HardDrive, ChevronDown, ChevronRight, FileJson } from "lucide-react";
 import { authFetch as fetch } from "../api/client";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "/api";
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -154,18 +154,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                 throw new Error(errData?.detail || "Failed to validate and save AWS credentials.");
             }
 
-            // Always trigger a fresh ingestion immediately (backend merges existing creds safely)
-            await fetch(`${API_BASE}/pipeline/export`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    client_id: clientId,
-                    include_aws: true,
-                    include_github: false
-                })
-            });
-
-            setAwsStatus({ type: "success", text: "Integrations saved & discovery started!" });
+            setAwsStatus({ type: "success", text: "AWS configuration saved successfully!" });
             setAwsAccessKey(""); setAwsSecretKey(""); setRoleArn(""); setExternalId("");
 
             fetchIntegrations(clientId);
@@ -332,7 +321,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                             )}
                             <div className="flex justify-end pt-4">
                                 <button onClick={handleSaveAWS} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
-                                    {isSaving ? "Saving..." : "Save Configuration and Ingest New Data"}
+                                    {isSaving ? "Saving..." : "Save Configuration"}
                                 </button>
                             </div>
                         </div>
@@ -455,14 +444,12 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                                                             <div className="text-xs text-green-400 flex items-center gap-1.5 mt-2 font-medium">✓ Connected</div>
                                                         </div>
                                                         {(!repo.last_ingested_at || repo.ingestion_status === 'failed') ? (
-                                                            <button onClick={() => handleForceIngest(repo)} disabled={ingesting[repo.id] || repo.ingestion_status === 'running'} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors animate-pulse hover:animate-none group shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                                                            <button onClick={() => handleForceIngest(repo)} disabled={ingesting[repo.id] || repo.ingestion_status === 'running'} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors group shadow-[0_0_15px_rgba(37,99,235,0.1)]">
                                                                 <Play className="w-3.5 h-3.5 fill-current" />
-                                                                {ingesting[repo.id] ? "Connecting..." : "Connect & Ingest"}
-                                                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping group-hover:hidden"></span>
-                                                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full group-hover:hidden"></span>
+                                                                {ingesting[repo.id] ? "Connecting..." : "Connect"}
                                                             </button>
                                                         ) : (
-                                                            <button onClick={() => handleForceIngest(repo)} disabled={ingesting[repo.id] || repo.ingestion_status === 'running'} className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-gray-300 rounded text-xs transition-colors">Run Again</button>
+                                                            <button onClick={() => handleForceIngest(repo)} disabled={ingesting[repo.id] || repo.ingestion_status === 'running'} className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-gray-300 rounded text-xs transition-colors">Reconnect</button>
                                                         )}
                                                     </div>
                                                 ))}

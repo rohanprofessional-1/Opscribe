@@ -18,9 +18,17 @@ class NormalizeStage(BaseStage):
 
     def _normalize_aws(self, raw_node, context):
         props = raw_node.get("properties", {})
-        service = props.get("service", "").upper()
-        res_type = props.get("resource_type", "").lower()
         key = raw_node["key"]
+        
+        service = props.get("service")
+        if not service:
+            # Fallback: extract from key if it follows the aws::{region}::{service}::{id} format
+            key_parts = key.split("::")
+            if len(key_parts) >= 3:
+                service = key_parts[2]
+        service = (service or "").upper()
+
+        res_type = (props.get("resource_type") or raw_node.get("node_subtype") or "").lower()
         
         template_id = "unknown"
         node_type = "unknown"
@@ -54,12 +62,12 @@ class NormalizeStage(BaseStage):
             template_id=template_id,
             display_name=raw_node.get("display_name", key),
             node_type=node_type,
-            environment="prod",
             source="aws",
             confidence=1.0,
             source_completeness="full",
             source_metadata=[{"source": "aws", "raw_key": raw_node["key"]}],
-            properties=props
+            properties=props,
+            environment="aws-prod" # Default for now, could be inferred from account/region
         )
 
         if template_id == "unknown":
@@ -107,12 +115,12 @@ class NormalizeStage(BaseStage):
             template_id=template_id,
             display_name=raw_node.get("display_name", key),
             node_type=node_type,
-            environment="dev",
             source="github",
             confidence=0.9,
             source_completeness="full",
             source_metadata=[{"source": "github", "raw_key": raw_node["key"]}],
-            properties=props
+            properties=props,
+            environment="local-dev" # Default for GitHub source
         )
 
         if template_id == "unknown":

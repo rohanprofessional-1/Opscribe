@@ -124,7 +124,11 @@ class TopologyScan:
                     display_name=n.name,
                     node_type=n.category,
                     node_subtype=n.resource_type,
-                    properties=n.properties,
+                    properties={
+                        "service": n.service,
+                        "resource_type": n.resource_type,
+                        **n.properties
+                    },
                     source_metadata={
                         "arn": n.merge_hints.get("arn", ""),
                         **n.merge_hints,

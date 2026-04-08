@@ -15,7 +15,22 @@ class ResolveStage(BaseStage):
                         edge_type=edge.get("edge_type", "depends_on"),
                         source="github",
                         confidence=0.9,
-                        environment="dev"
+                        environment="local-dev"
+                    ))
+
+        # 2. Capture original edges from AWS sources
+        if context.raw_aws and "sources" in context.raw_aws:
+            for source in context.raw_aws["sources"]:
+                for edge in source.get("edges", []):
+                    context.edges.append(IREdge(
+                        id=f"aws-edge-{len(context.edges)}",
+                        from_node_id=edge["from_node_key"],
+                        to_node_id=edge["to_node_key"],
+                        edge_type=edge.get("edge_type", "references"),
+                        source="aws",
+                        confidence=1.0,
+                        environment="aws-prod",
+                        properties=edge.get("properties", {})
                     ))
 
         # 2. Process Nodes for merging/suppression

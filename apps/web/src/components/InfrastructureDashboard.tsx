@@ -1,56 +1,20 @@
-/**
- * This component is the infrastructure dashboard for the infrastructure design
- * and will be the main component for the infrastructure design.
- * It displays the list of designs and allows the user to create a new design.
- * It also allows the user to open a design and delete a design.
- */
-
-import { useState, useEffect } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { Plus, Network, Calendar, Trash2, Settings as SettingsIcon, Database, Github, LogOut, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { Plus, Network, Calendar, Trash2, Database } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
-import SettingsModal from "./SettingsModal";
-import { authFetch as fetch } from "../api/client";
+import IngestionWizard from "./IngestionWizard";
 
-const API_BASE = "/api";
 
 export default function InfrastructureDashboard({
   designs,
   loading = false,
   error = null,
-  createPending = false,
-  onCreateNew,
   onOpenDesign,
   onDeleteDesign,
+  onIngestionTriggered,
+  clientId,
 }: InfrastructureDashboardProps) {
-  const { user, logout } = useAuth0();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<"aws" | "repos" | undefined>(undefined);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-  const [awsConnected, setAwsConnected] = useState<boolean | null>(null);
-  const [githubConnected, setGithubConnected] = useState<boolean | null>(null);
-
-  // Fetch integration status to determine if we should show the Onboarding Hero
-  useEffect(() => {
-    fetch(`${API_BASE}/clients/me`)
-      .then(r => r.json())
-      .then(d => {
-        Promise.all([
-          fetch(`${API_BASE}/integrations/?client_id=${d.id}`).then(r => r.json())
-        ]).then(([ints]) => {
-          const hasAws = Array.isArray(ints) && ints.some(i => i.provider === 'aws');
-          const hasGh = Array.isArray(ints) && ints.some(i => i.provider === 'github_app');
-          setAwsConnected(hasAws);
-          setGithubConnected(hasGh);
-        }).catch(() => {
-          setAwsConnected(false);
-          setGithubConnected(false);
-        });
-      }).catch(() => {
-        setAwsConnected(false);
-        setGithubConnected(false);
-      });
-  }, [isSettingsOpen]);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -61,159 +25,72 @@ export default function InfrastructureDashboard({
     return d.toLocaleDateString();
   };
 
-  const openSettings = (tab?: "aws" | "repos") => {
-    setSettingsTab(tab);
-    setIsSettingsOpen(true);
+  const handleCreateNew = () => {
+    setIsWizardOpen(true);
   };
 
-  // The Onboarding Hero View for NET NEW clients
-  if (designs.length === 0 && (awsConnected === false || githubConnected === false) && !loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 p-8 flex items-center justify-center">
-        <div className="max-w-3xl w-full text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to Opscribe</h1>
-          <p className="text-lg text-gray-400 mb-12">
-            Let's build your infrastructure graph. Connect your cloud environment or codebase to get started.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button
-              onClick={() => openSettings("aws")}
-              className={`flex flex-col items-center justify-center p-10 bg-gray-900 border rounded-2xl transition-all group relative overflow-hidden ${awsConnected ? 'border-green-500/50 bg-green-500/5' : 'border-gray-800 hover:border-blue-500'}`}
-            >
-              {awsConnected && (
-                <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 text-[10px] font-bold text-green-400 uppercase tracking-wider backdrop-blur-sm border border-green-500/20">
-                  <CheckCircle className="w-3 h-3" /> Connected
-                </div>
-              )}
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform ${awsConnected ? 'bg-green-500/20 scale-105' : 'bg-blue-500/10 group-hover:scale-110'}`}>
-                <Database className={`w-8 h-8 ${awsConnected ? 'text-green-400' : 'text-blue-400'}`} />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Connect AWS</h3>
-              <p className="text-sm text-gray-500 text-center">
-                Discover your VPCs, EC2s, RDS instances, and their relationships automatically using cross-account roles.
-              </p>
-            </button>
-
-            <button
-              onClick={() => openSettings("repos")}
-              className={`flex flex-col items-center justify-center p-10 bg-gray-900 border rounded-2xl transition-all group relative overflow-hidden ${githubConnected ? 'border-green-500/50 bg-green-500/5' : 'border-gray-800 hover:border-purple-500'}`}
-            >
-              {githubConnected && (
-                <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 text-[10px] font-bold text-green-400 uppercase tracking-wider backdrop-blur-sm border border-green-500/20">
-                  <CheckCircle className="w-3 h-3" /> Connected
-                </div>
-              )}
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform ${githubConnected ? 'bg-green-500/20 scale-105' : 'bg-purple-500/10 group-hover:scale-110'}`}>
-                <Github className={`w-8 h-8 ${githubConnected ? 'text-green-400' : 'text-purple-400'}`} />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Connect GitHub</h3>
-              <p className="text-sm text-gray-500 text-center">
-                Install our application to parse Dockerfiles, Kubernetes manifests, and IaC to map your services.
-              </p>
-            </button>
-          </div>
-        </div>
-
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          initialTab={settingsTab}
-          onClose={() => setIsSettingsOpen(false)}
-        />
-      </div>
-    );
-  }
+  const handleIngestionStarted = (graphName: string) => {
+    setIsWizardOpen(false);
+    onIngestionTriggered(graphName);
+  };
 
   // Standard Dashboard View
   return (
-    <div className="min-h-screen bg-[#020617] relative">
-      <nav className="fixed top-0 left-0 w-full z-10 bg-[#01040a]/80 backdrop-blur-md border-b border-white/5 px-8 py-4 flex justify-between items-center shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-white/10 bg-white/5">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
-          </div>
-          <span className="text-xl font-black tracking-tighter uppercase text-white">Opscribe</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => openSettings()}
-            className="flex items-center justify-center gap-2 p-2 px-3 border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium shadow-sm"
-          >
-            <SettingsIcon className="w-4 h-4" />
-            Provider Settings
-          </button>
-
-          <div className="h-6 w-px bg-gray-800 mx-1"></div>
-
-          <div className="flex items-center gap-3">
-            {user?.picture ? (
-              <img src={user.picture} alt={user?.name || "User"} className="w-8 h-8 rounded-full border border-gray-700 shadow-lg shadow-blue-500/20" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-blue-500/20">
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </div>
-            )}
-            <button
-              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-              className="group flex items-center justify-center p-2 hover:bg-red-500/10 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
-              title="Log Out"
-            >
-              <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-6xl mx-auto pt-32 pb-20 px-4">
-        <header className="mb-10 flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight uppercase">
-              Infrastructure Designs
-            </h1>
-            <p className="text-slate-500 mt-2 font-medium">
-              View and manage your architectural knowledge maps.
-            </p>
-          </div>
+    <div className="min-h-screen bg-transparent relative p-8 md:p-12">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-12">
+          <h1 className="text-4xl font-black text-white tracking-tight uppercase mb-2">
+            Infrastructure Designs
+          </h1>
+          <p className="text-slate-500 font-medium text-lg">
+            View and manage your architectural knowledge maps.
+          </p>
         </header>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-900/30 border border-red-700 text-red-300 text-sm">
+          <div className="mb-8 p-4 rounded-xl bg-red-950/20 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-gray-400">
-            Loading...
+          <div className="flex flex-col items-center justify-center py-32 text-gray-500 gap-4">
+            <div className="w-8 h-8 border-2 border-white/5 border-t-blue-500 rounded-full animate-spin" />
+            <span>Loading your designs...</span>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <button
-                onClick={onCreateNew}
-                disabled={createPending}
-                className="aspect-square flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-600 bg-gray-900/50 hover:border-blue-500 hover:bg-gray-800/80 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleCreateNew}
+                className="aspect-square flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-white/5 bg-white/[0.02] hover:border-blue-500/50 hover:bg-white/[0.05] transition-all group relative overflow-hidden"
               >
-                <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                  <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-400" />
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:scale-110 transition-all duration-500">
+                  <Plus className="w-8 h-8 text-gray-500 group-hover:text-blue-400" />
                 </div>
-                <span className="text-sm font-medium text-gray-400 group-hover:text-gray-300">
-                  {createPending ? "Creating..." : "Create new design"}
-                </span>
+                <div className="text-center">
+                    <span className="block text-sm font-bold text-gray-400 group-hover:text-white transition-colors">
+                      New Design
+                    </span>
+                    <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold mt-1 block">
+                        Start Discovery
+                    </span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-transparent pointer-events-none" />
               </button>
 
               {designs.map((design) => (
                 <div
                   key={design.id}
-                  className="aspect-square flex flex-col rounded-xl border border-gray-700 bg-gray-900 hover:border-gray-600 transition-all overflow-hidden group cursor-pointer"
+                  className="aspect-square flex flex-col rounded-2xl border border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04] transition-all overflow-hidden group cursor-pointer relative"
                 >
                   <div
                     onClick={() => onOpenDesign(design.id)}
-                    className="flex-1 flex flex-col p-4"
+                    className="flex-1 flex flex-col p-6 z-10"
                   >
                     <div className="flex items-start justify-between">
-                      <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-blue-500/5">
                         <Network className="w-6 h-6 text-blue-400" />
                       </div>
                       <button
@@ -221,42 +98,62 @@ export default function InfrastructureDashboard({
                           e.stopPropagation();
                           onDeleteDesign(design.id);
                         }}
-                        className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
+                        className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-all"
                         title="Delete design"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    <h3 className="mt-4 font-medium text-white truncate">
-                      {design.name}
-                    </h3>
-                    <div className="mt-auto pt-4 flex items-center gap-2 text-xs text-gray-500">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatDate(design.updatedAt)}
+                    
+                    <div className="mt-6">
+                        <h3 className="font-bold text-white text-lg truncate group-hover:text-blue-400 transition-colors">
+                          {design.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-wider">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(design.updatedAt)}
+                        </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {design.nodes.length} nodes · {design.edges.length}{" "}
-                      connections
-                    </p>
+
+                    <div className="mt-auto pt-4 flex items-center gap-4">
+                        <div className="flex flex-col">
+                            <span className="text-white font-bold text-sm">{design.nodes.length}</span>
+                            <span className="text-[10px] text-gray-600 uppercase font-black">Nodes</span>
+                        </div>
+                        <div className="w-px h-6 bg-white/5" />
+                        <div className="flex flex-col">
+                            <span className="text-white font-bold text-sm tracking-tight">{design.edges.length}</span>
+                            <span className="text-[10px] text-gray-600 uppercase font-black tracking-tighter">Edges</span>
+                        </div>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 right-0 p-6 opacity-0 group-hover:opacity-10 scale-150 group-hover:scale-100 transition-all duration-700 pointer-events-none">
+                     <Network className="w-24 h-24 text-blue-500" />
                   </div>
                 </div>
               ))}
             </div>
 
             {designs.length === 0 && (
-              <p className="text-center text-gray-500 mt-12">
-                No designs yet. Click the card above to create your first
-                infrastructure. (Or wait for Auto-Discovery to finish!)
-              </p>
+              <div className="text-center py-32 border-2 border-dashed border-white/5 rounded-3xl mt-12 bg-white/[0.01]">
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Database className="w-10 h-10 text-gray-600" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">No infrastructure maps found</h2>
+                <p className="text-gray-500 max-w-sm mx-auto">
+                  Start discovery or create your first design manually to see it here.
+                </p>
+              </div>
             )}
           </>
         )}
       </div>
 
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        initialTab={settingsTab}
-        onClose={() => setIsSettingsOpen(false)}
+      <IngestionWizard 
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        clientId={clientId}
+        onIngestionStarted={handleIngestionStarted}
       />
     </div>
   );
