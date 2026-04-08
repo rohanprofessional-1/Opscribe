@@ -261,7 +261,7 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
                         </div>
                         <h3 className="text-2xl font-bold mb-3 tracking-tight text-white">Opscribe Intelligence</h3>
                         <p className="text-sm text-gray-400 leading-relaxed max-w-[240px]">
-                            I've analyzed your **{designName}** graph. Ask me about {persona === 'pm' ? 'business trade-offs or technical debt' : 'scaling, security, or implementation details'}.
+                            I've analyzed your {designName} graph. Ask me about {persona === 'pm' ? 'business trade-offs or technical debt' : 'scaling, security, or implementation details'}.
                         </p>
                         <div className="mt-8 grid grid-cols-1 gap-2 w-full max-w-[200px]">
                             <button 

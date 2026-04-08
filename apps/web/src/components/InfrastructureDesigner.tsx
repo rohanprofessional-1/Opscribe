@@ -353,7 +353,6 @@ export default function InfrastructureDesigner({
             ...n,
             data: {
               ...n.data,
-              label: persona === "pm" ? getAnalogy(n.data.label) : n.data.label,
               persona,
               stability: (n.data as any).stability || 85,
               tech_debt: (n.data as any).tech_debt || 20,

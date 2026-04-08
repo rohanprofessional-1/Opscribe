@@ -107,7 +107,7 @@ export default function NodePalette({ onDragStart, persona }: NodePaletteProps) 
                   )}
                 </div>
                 <span className={`font-medium transition-colors ${isPM ? 'text-xs text-blue-400 uppercase tracking-widest font-black' : 'text-sm text-gray-200'}`}>
-                  {isPM ? getAnalogy(category.label) : category.label}
+                  {category.label}
                 </span>
                 <span className="ml-auto text-xs text-gray-500">
                   {templates.length}
