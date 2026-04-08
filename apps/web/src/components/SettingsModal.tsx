@@ -324,7 +324,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab }: SettingsM
                             )}
                             <div className="flex justify-end pt-4">
                                 <button onClick={handleSaveAWS} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
-                                    {isSaving ? "Saving..." : "Save Configuration and Ingest New Data"}
+                                    {isSaving ? "Saving..." : "Save Configuration"}
                                 </button>
                             </div>
                         </div>

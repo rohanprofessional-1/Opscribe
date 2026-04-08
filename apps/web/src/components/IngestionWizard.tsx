@@ -43,8 +43,7 @@ export default function IngestionWizard({ isOpen, onClose, clientId, onIngestion
     const fetchAvailableRepos = async () => {
         setLoadingRepos(true);
         try {
-            // Fetch ALL authorized repositories from the GitHub App installation,
-            // not just the ones that have been "pre-connected" in Settings.
+            // Fetch all authorized repositories (the same list seen in Provider Settings)
             const res = await fetch(`${API_BASE}/github/repos?client_id=${clientId}`);
             if (res.ok) {
                 const data = await res.json();

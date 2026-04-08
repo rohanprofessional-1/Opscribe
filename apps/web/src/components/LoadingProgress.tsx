@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Zap, Loader2 } from "lucide-react";
 
 interface LoadingProgressProps {
@@ -7,23 +6,6 @@ interface LoadingProgressProps {
 }
 
 export default function LoadingProgress({ isVisible, graphName }: LoadingProgressProps) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    if (isVisible) {
-      setProgress(5);
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 95) return 95; // Stall at 95 until finished
-          return prev + Math.random() * 2;
-        });
-      }, 500);
-      return () => clearInterval(interval);
-    } else {
-      setProgress(0);
-    }
-  }, [isVisible]);
-
   if (!isVisible) return null;
 
   return (
@@ -45,20 +27,12 @@ export default function LoadingProgress({ isVisible, graphName }: LoadingProgres
           </div>
         </div>
 
-        <div className="flex-1 max-w-2xl relative">
-          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-             {/* The progress bar itself */}
-             <div 
-               className="h-full bg-gradient-to-r from-blue-600 via-blue-400 to-indigo-500 transition-all duration-1000 ease-out relative"
-               style={{ width: `${progress}%` }}
-             >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-shimmer" />
-             </div>
+        <div className="flex items-center gap-3 pr-4">
+          <div className="flex flex-col items-end">
+             <span className="text-[10px] font-mono text-blue-500 font-bold uppercase tracking-widest">Processing</span>
+             <p className="text-[10px] text-gray-500 font-medium">Please wait...</p>
           </div>
-          <div className="absolute -bottom-5 right-0">
-             <span className="text-[10px] font-mono text-blue-500 font-bold">{Math.round(progress)}%</span>
-          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
         </div>
       </div>
       

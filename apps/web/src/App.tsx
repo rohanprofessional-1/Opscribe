@@ -33,8 +33,9 @@ function App() {
     }
   }, [isAuthenticated, isLoading, getAccessTokenSilently]);
 
-  const [view, setView] = useState<View>("dashboard");
+   const [view, setView] = useState<View>("dashboard");
   const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
+  const [clientId, setClientId] = useState<string>("");
   
   // Ingestion State
   const [isIngesting, setIsIngesting] = useState(false);
@@ -62,6 +63,7 @@ function App() {
     fetch(`${API_BASE}/clients/me`)
       .then(r => r.json())
       .then(d => {
+        setClientId(d.id);
         fetch(`${API_BASE}/integrations/?client_id=${d.id}`)
           .then(r => r.json())
           .then(ints => {
@@ -166,6 +168,7 @@ function App() {
               designs={designs}
               loading={designsLoading}
               error={error}
+              clientId={clientId}
               onOpenDesign={handleOpenDesign}
               onDeleteDesign={deleteDesign}
               onIngestionTriggered={handleStartIngestion}

@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Network, Calendar, Trash2, Database } from "lucide-react";
 import type { InfrastructureDashboardProps } from "../types/infrastructure";
 import IngestionWizard from "./IngestionWizard";
 
-const API_BASE = "/api";
 
 export default function InfrastructureDashboard({
   designs,
@@ -12,16 +11,10 @@ export default function InfrastructureDashboard({
   onOpenDesign,
   onDeleteDesign,
   onIngestionTriggered,
+  clientId,
 }: InfrastructureDashboardProps) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [clientId, setClientId] = useState<string>("");
 
-  // Fetch client ID for the wizard
-  useEffect(() => {
-    fetch(`${API_BASE}/clients/me`)
-      .then(r => r.json())
-      .then(d => setClientId(d.id));
-  }, []);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
