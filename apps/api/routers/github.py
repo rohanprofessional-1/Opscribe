@@ -121,10 +121,22 @@ async def get_repositories(client_id: UUID, session: Session = Depends(get_sessi
                 
             page += 1
             
-        print(f"DEBUG: Found {len(all_repos)} repositories total across {page} pages.")
+        # Fetch existing connected repositories to mark the live list
+        stmt = select(ConnectedRepository).where(ConnectedRepository.client_id == client_id)
+        connected_list = session.exec(stmt).all()
+        connected_map = {r.repo_url: r for r in connected_list}
+        
+        print(f"DEBUG: Found {len(all_repos)} repositories total across {page} pages. {len(connected_list)} are already connected.")
 
         return [
-            {"id": str(r["id"]), "name": r["full_name"], "default_branch": r["default_branch"]}
+            {
+                "id": str(r["id"]), 
+                "name": r["full_name"], 
+                "default_branch": r["default_branch"],
+                "is_connected": f"https://github.com/{r['full_name']}" in connected_map,
+                "last_ingested_at": getattr(connected_map.get(f"https://github.com/{r['full_name']}"), "last_ingested_at", None),
+                "ingestion_status": getattr(connected_map.get(f"https://github.com/{r['full_name']}"), "ingestion_status", None)
+            }
             for r in all_repos
         ]
     except Exception as e:
@@ -172,14 +184,9 @@ async def connect_repository(
     session.commit()
     session.refresh(repo)
 
-    ingestor = GitHubIngestor(client_id=str(request.client_id), session=session, repo_url=request.repo_url)
-    exporter = S3Exporter()
-    background_tasks.add_task(
-        run_export,
-        client_id=str(request.client_id),
-        ingestors=[ingestor],
-        exporter=exporter
-    )
+    session.add(repo)
+    session.commit()
+    session.refresh(repo)
 
     return {"status": "success", "repository_id": repo.id}
 

@@ -129,8 +129,8 @@ export interface InfrastructureDashboardProps {
   designs: InfrastructureDesign[];
   loading?: boolean;
   error?: string | null;
-  createPending?: boolean;
-  onCreateNew: () => void;
+  clientId: string;
   onOpenDesign: (id: string) => void;
   onDeleteDesign: (id: string) => void;
+  onIngestionTriggered: (name: string) => void;
 }

@@ -26,15 +26,24 @@ router = APIRouter(
     tags=["pipeline"],
 )
 
+class RepositorySelection(BaseModel):
+    repo_url: str
+    target_repo_id: Optional[str] = None
+    default_branch: Optional[str] = "main"
+
 class ExportRequest(BaseModel):
     client_id: str
     include_aws: bool = True
     include_github: bool = True
+    aws_region: str = "us-east-1"
+    graph_name: Optional[str] = None
+    repositories: Optional[List[RepositorySelection]] = None
 
 class GithubLinkRequest(BaseModel):
     client_id: UUID
     repo_url: str
     branch: Optional[str] = "main"
+    graph_name: Optional[str] = None
 
 class ExportResponse(BaseModel):
     status: str
@@ -44,6 +53,7 @@ async def run_export(
     client_id: str,
     ingestors: List[BaseIngestor],
     exporter: BaseExporter,
+    graph_name: Optional[str] = None,
 ):
     try:
         results = []
@@ -60,7 +70,7 @@ async def run_export(
             combined_results = await exporter.load_current(client_id=client_id)
             if combined_results:
                 with Session(engine) as session:
-                    await ingest_to_all_clients(results=combined_results, original_client_id=client_id, session=session)
+                    await ingest_to_all_clients(results=combined_results, original_client_id=client_id, graph_name=graph_name, session=session)
             else:
                 logger.warning(f"No current state results found for client {client_id} despite successful export.")
     except Exception as e:
@@ -93,7 +103,38 @@ async def trigger_export(
         ingestors.append(AWSIngestor(region_name="us-east-1", credentials=aws_creds))
     
     if request.include_github:
-        ingestors.append(GitHubIngestor(client_id=request.client_id, session=session))
+        if request.repositories:
+            # Detect and auto-connect any new repositories selected in the wizard
+            installation_id = client.metadata_.get("github_installation_id")
+            
+            for repo_info in request.repositories:
+                # Check if this repo is already connected for this client
+                stmt = select(ConnectedRepository).where(
+                    ConnectedRepository.client_id == request.client_id,
+                    ConnectedRepository.repo_url == repo_info.repo_url
+                )
+                existing = session.exec(stmt).first()
+                
+                if not existing and installation_id:
+                    # Create a new connection record on the fly
+                    new_repo = ConnectedRepository(
+                        client_id=request.client_id,
+                        repo_url=repo_info.repo_url,
+                        default_branch=repo_info.default_branch or "main",
+                        installation_id=str(installation_id),
+                        target_repo_id=repo_info.target_repo_id or "",
+                        ingestion_status="pending"
+                    )
+                    session.add(new_repo)
+                    logger.info(f"Auto-connected new repository: {repo_info.repo_url}")
+            
+            session.commit()
+
+            # Now add ingestors for the requested repos
+            for repo_info in request.repositories:
+                ingestors.append(GitHubIngestor(client_id=request.client_id, session=session, repo_url=repo_info.repo_url))
+        else:
+            ingestors.append(GitHubIngestor(client_id=request.client_id, session=session))
 
     exporter = S3Exporter()
 
@@ -102,6 +143,7 @@ async def trigger_export(
         client_id=request.client_id,
         ingestors=ingestors,
         exporter=exporter,
+        graph_name=request.graph_name,
     )
 
     return ExportResponse(
@@ -145,6 +187,7 @@ async def trigger_github_link(
         client_id=str(request.client_id),
         ingestors=ingestors,
         exporter=exporter,
+        graph_name=request.graph_name,
     )
 
     return ExportResponse(
