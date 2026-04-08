@@ -129,7 +129,7 @@ const InfrastructureNode = memo(
                 </p>
                 {techDebt > 50 && (
                    <span className="flex items-center gap-0.5 text-[9px] font-black bg-red-900/50 text-red-400 px-1.5 py-0.5 rounded border border-red-800/50 animate-bounce-subtle">
-                      <Icons.Wrench size={8} /> DEBT: {techDebt}%
+                      DEBT: {techDebt}%
                    </span>
                 )}
               </div>
@@ -140,7 +140,7 @@ const InfrastructureNode = memo(
           <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
               <div className="flex flex-col">
                   <span className="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Strategic Impact</span>
-                  <span className="text-[10px] text-blue-300 font-bold">{criticality === 'high' ? '💎 Critical' : '⚡ Supporting'}</span>
+                  <span className="text-[10px] font-bold text-blue-300">{criticality === 'high' ? 'Critical' : 'Supporting'}</span>
               </div>
               <div className="flex flex-col text-right">
                   <span className="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Stability</span>

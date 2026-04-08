@@ -57,7 +57,7 @@ export default function NodePalette({ onDragStart, persona }: NodePaletteProps) 
   return (
     <div className="w-64 bg-gray-900 border-r border-gray-700 flex flex-col h-full">
       <div className={`p-4 border-b border-gray-700 ${isPM ? 'bg-gray-900/80 backdrop-blur' : ''}`}>
-        <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 mb-3">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
             {isPM ? "Strategic Components" : "Infrastructure Nodes"}
         </h2>
         <div className="relative">

@@ -31,6 +31,8 @@ export default function PropertiesPanel({
   onClose,
   persona,
 }: PropertiesPanelProps) {
+  const isPM = persona === "pm";
+
   if (!selectedNode) {
     return (
       <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col h-full">
@@ -61,7 +63,7 @@ export default function PropertiesPanel({
   };
 
   const renderCategoryFields = () => {
-    if (persona === "pm") {
+    if (isPM) {
       return (
         <>
           <FormField label="Strategic Impact">
@@ -70,15 +72,15 @@ export default function PropertiesPanel({
               onChange={(e) => handleChange("strategicImpact", e.target.value)}
               className="form-select"
             >
-              <option value="critical">🔥 Critical (Mission-Essential)</option>
-              <option value="high">✨ High (Revenue-Driving)</option>
-              <option value="medium">⚡ Medium (Supporting)</option>
-              <option value="low">☁️ Low (Non-Essential)</option>
+              <option value="critical">Critical (Mission-Essential)</option>
+              <option value="high">High (Revenue-Driving)</option>
+              <option value="medium">Medium (Supporting)</option>
+              <option value="low">Low (Non-Essential)</option>
             </select>
           </FormField>
 
           <FormField label="Cost Estimate">
-             <select
+            <select
               value={(data as any).costEstimate || "$$"}
               onChange={(e) => handleChange("costEstimate", e.target.value)}
               className="form-select"
@@ -99,7 +101,7 @@ export default function PropertiesPanel({
               className="form-input"
             />
           </FormField>
-          
+
           <div className="p-3 bg-purple-900/20 border border-purple-800/50 rounded-lg">
             <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">PM Insight</p>
             <p className="text-xs text-purple-200/80 leading-relaxed italic">
@@ -552,9 +554,11 @@ export default function PropertiesPanel({
 
   return (
     <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col h-full">
-      <div className="p-4 border-b border-gray-700">
+      <div className={`p-4 border-b border-gray-700 ${isPM ? 'bg-gray-900/80 backdrop-blur' : ''}`}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-white">Properties</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            {isPM ? "Strategic Components" : "Infrastructure Nodes"}
+          </h2>
           <button
             onClick={onClose}
             className="p-1 rounded hover:bg-gray-800 transition-colors"

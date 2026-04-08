@@ -268,7 +268,7 @@ export default function RAGChat({ clientId, graphId, nodes, edges, designName, o
                                 onClick={() => setQuery(persona === 'pm' ? 'What is the highest risk node?' : 'Explain the data flow.')}
                                 className="text-[11px] font-bold uppercase tracking-widest p-2 rounded border border-gray-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all text-gray-500 hover:text-blue-400"
                             >
-                                {persona === 'pm' ? '🔍 Identify Risks' : '⚙️ Analyze Flow'}
+                                {persona === 'pm' ? 'Identify Risks' : 'Analyze Flow'}
                             </button>
                         </div>
                     </div>
